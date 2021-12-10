@@ -1,0 +1,71 @@
+{
+  "builders": [
+    {
+      "type": "qemu",
+      "accelerator": "kvm",
+      "boot_command": [
+        { boot_command }
+      ],
+      "boot_wait": "{ boot_wait }",
+      "disk_interface": "virtio",
+      "disk_compression": "true",
+      "disk_size": "{ box_disk_size }",
+      "format": "qcow2",
+      "headless": { packer_headless },
+      "host_port_max": 2229,
+      "host_port_min": 2222,
+      "http_directory": "{ packer_http_directory }",
+      "http_port_max": 10089,
+      "http_port_min": 10082,
+      "iso_checksum": "{ packer_iso_checksum }",
+      "iso_urls": [
+        { packer_iso_urls }
+      ],
+      "net_device": "virtio-net",
+      "output_directory": "{ packer_image_dir }",
+      "qemuargs": [
+        [
+          "-m",
+          "2048M"
+        ],
+        [
+          "-smp",
+          "cpus=1,maxcpus=16,cores=4"
+        ]
+        { qemu_efi_bios }
+      ],
+      "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -h -p",
+      "ssh_port": 22,
+      "ssh_timeout": "50m",
+      "ssh_keep_alive_interval": "1s",
+      "ssh_handshake_attempts": "100",
+      "ssh_password": "{ vagrant_password }",
+      "ssh_username": "vagrant",
+      "vm_name": "{ box_name_filename }"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+      "scripts": [
+        { packer_pre_ansible_scripts }
+      ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+      "inline": [
+        { packer_ansible_install }
+      ]
+    },
+    { packer_ansible_run }
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+      "scripts": [
+        { packer_post_ansible_scripts }
+      ]
+    }
+  ]
+}

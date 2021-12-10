@@ -1,0 +1,71 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: boxes build
+  hosts: 127.0.0.1
+  connection: local
+  become: false
+  gather_facts: yes
+
+  vars_files:
+    - "boxconfig.yml"
+
+  vars:
+    working_dir: "{{ lookup('env', 'PWD') }}"
+    box_boottype: mbr
+    efi_bios: "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd"
+
+    packer_image_dir:
+      archlinux:  "{{ working_dir }}/build/images/archlinux"
+      debian:     "{{ working_dir }}/build/images/debian"
+      ubuntu:     "{{ working_dir }}/build/images/ubuntu"
+      fedora:     "{{ working_dir }}/build/images/fedora"
+      rhel8:      "{{ working_dir }}/build/images/rhel8"
+      rhel7:      "{{ working_dir }}/build/images/rhel7"
+      rocky8:     "{{ working_dir }}/build/images/rocky8"
+      almalinux:  "{{ working_dir }}/build/images/almalinux"
+    
+    efi_bios_boot: ""
+    qemu_command: ""
+    #qemu_vga: virtio
+    qemu_vga: "virtio"
+    #qemu_sound: "-audiodev spice,id=snd0 -soundhw hda"
+    qemu_sound: "-device ich9-intel-hda -device hda-micro,audiodev=hda -audiodev pa,id=hda,server=/run/user/1000/pulse/native"
+
+  tasks:
+
+  - name: set efi bios
+    set_fact:
+      efi_bios_boot: "--bios {{ efi_bios }}"
+    when: box_boottype == "efi"
+
+  - name: set qemu command
+    set_fact:
+      qemu_command: "qemu-system-x86_64 --enable-kvm {{ efi_bios_boot }} -m 4096 -drive file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,if=virtio -k de -vga {{ qemu_vga }} -device virtio-serial-pci -netdev user,id=user.0,hostfwd=tcp::2222-:22 -device virtio-net,netdev=user.0 -spice gl=on,port=5930,disable-ticketing {{ qemu_sound }} -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent -display spice-app"
+
+  - name: vm image
+    debug:
+      msg: "{{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2"
+
+  - name: run command
+    debug:
+      msg: "{{ qemu_command }}"
+
+  - name: startvm box
+    shell: "{{ qemu_command }}"
+    become: true

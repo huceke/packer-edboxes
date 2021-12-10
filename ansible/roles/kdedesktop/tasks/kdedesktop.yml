@@ -1,0 +1,697 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: include common vars
+  include_vars: "kdedesktop.yml"
+
+- name: /etc/sddm.conf.d dir
+  file:
+    path: /etc/sddm.conf.d
+    state: directory
+    mode: 0755
+
+- name: sddm default theme
+  copy:
+    dest: /etc/sddm.conf.d/edboxes.conf
+    content: |
+      [Theme]
+      Current=breeze
+    owner: root
+    group: root
+    mode: 0644
+
+- name: sddm backgtound image
+  copy:
+    dest: /usr/share/sddm/themes/breeze/theme.conf.user
+    content: |
+      [General]
+      background=/usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/skel/.config skel dir
+  file:
+    path: /etc/skel/.config
+    state: directory
+    mode: 0755
+
+- name: /etc/skel/.config/gtk-3.0 skel dir
+  file:
+    path: /etc/skel/.config/gtk-3.0
+    state: directory
+    mode: 0755
+
+- name: /etc/skel/.config/xsettingsd skel dir
+  file:
+    path: /etc/skel/.config/xsettingsd
+    state: directory
+    mode: 0755
+
+- name: /etc/skel/.config/gtk-3.0 config
+  copy:
+    dest: /etc/skel/.config/gtk-3.0/settings.ini
+    content: |
+      [Settings]
+      gtk-application-prefer-dark-theme=false
+      gtk-button-images=true
+      gtk-cursor-theme-name=breeze_cursors
+      gtk-cursor-theme-size=24
+      gtk-decoration-layout=icon:minimize,maximize,close
+      gtk-enable-animations=true
+      gtk-font-name=Noto Sans,  10
+      gtk-icon-theme-name=Numix
+      gtk-menu-images=true
+      gtk-modules=colorreload-gtk-module:window-decorations-gtk-module
+      gtk-primary-button-warps-slider=false
+      gtk-theme-name=Numix
+      gtk-toolbar-style=3
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/skel/.config/kdeglobals config
+  copy:
+    dest: /etc/skel/.config/kdeglobals
+    content: |
+      [ColorEffects:Disabled]
+      ChangeSelectionColor=
+      Color=56,56,56
+      ColorAmount=0
+      ColorEffect=0
+      ContrastAmount=0.65
+      ContrastEffect=1
+      Enable=
+      IntensityAmount=0.1
+      IntensityEffect=2
+
+      [ColorEffects:Inactive]
+      ChangeSelectionColor=true
+      Color=112,111,110
+      ColorAmount=0.025
+      ColorEffect=2
+      ContrastAmount=0.1
+      ContrastEffect=2
+      Enable=false
+      IntensityAmount=0
+      IntensityEffect=0
+
+      [Colors:Button]
+      BackgroundAlternate=189,195,199
+      BackgroundNormal=238,238,238
+      DecorationFocus=240,84,76
+      DecorationHover=240,84,76
+      ForegroundActive=61,174,233
+      ForegroundInactive=136,136,128
+      ForegroundLink=41,128,185
+      ForegroundNegative=239,85,92
+      ForegroundNeutral=255,128,0
+      ForegroundNormal=68,68,68
+      ForegroundPositive=84,205,238
+      ForegroundVisited=127,140,141
+
+      [Colors:Complementary]
+      BackgroundAlternate=59,64,69
+      BackgroundNormal=49,54,59
+      DecorationFocus=30,146,255
+      DecorationHover=61,174,230
+      ForegroundActive=246,116,0
+      ForegroundInactive=175,176,179
+      ForegroundLink=61,174,230
+      ForegroundNegative=237,21,21
+      ForegroundNeutral=201,206,59
+      ForegroundNormal=239,240,241
+      ForegroundPositive=17,209,22
+      ForegroundVisited=61,174,230
+
+      [Colors:Selection]
+      BackgroundAlternate=29,153,243
+      BackgroundNormal=240,84,76
+      DecorationFocus=240,84,76
+      DecorationHover=240,84,76
+      ForegroundActive=252,252,252
+      ForegroundInactive=236,236,236
+      ForegroundLink=253,188,75
+      ForegroundNegative=239,85,92
+      ForegroundNeutral=255,128,0
+      ForegroundNormal=236,236,236
+      ForegroundPositive=84,205,238
+      ForegroundVisited=189,195,199
+
+      [Colors:Tooltip]
+      BackgroundAlternate=77,77,77
+      BackgroundNormal=68,68,68
+      DecorationFocus=240,84,76
+      DecorationHover=240,84,76
+      ForegroundActive=61,174,233
+      ForegroundInactive=136,136,128
+      ForegroundLink=41,128,185
+      ForegroundNegative=239,85,92
+      ForegroundNeutral=255,128,0
+      ForegroundNormal=236,236,236
+      ForegroundPositive=84,205,238
+      ForegroundVisited=127,140,141
+
+      [Colors:View]
+      BackgroundAlternate=239,240,241
+      BackgroundNormal=255,255,255
+      DecorationFocus=240,84,76
+      DecorationHover=240,84,76
+      ForegroundActive=61,174,233
+      ForegroundInactive=136,136,128
+      ForegroundLink=41,128,185
+      ForegroundNegative=239,85,92
+      ForegroundNeutral=255,128,0
+      ForegroundNormal=68,68,68
+      ForegroundPositive=84,205,238
+      ForegroundVisited=127,140,141
+
+      [Colors:Window]
+      BackgroundAlternate=189,195,199
+      BackgroundNormal=238,238,238
+      DecorationFocus=240,84,76
+      DecorationHover=240,84,76
+      ForegroundActive=61,174,233
+      ForegroundInactive=136,136,128
+      ForegroundLink=41,128,185
+      ForegroundNegative=239,85,92
+      ForegroundNeutral=255,128,0
+      ForegroundNormal=68,68,68
+      ForegroundPositive=84,205,238
+      ForegroundVisited=127,140,141
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/skel/.config/xsettingsd config
+  copy:
+    dest: /etc/skel/.config/xsettingsd/xsettingsd.conf
+    content: |
+      Net/ThemeName "Numix"
+      Gtk/EnableAnimations 1
+      Gtk/DecorationLayout "icon:minimize,maximize,close"
+      Gtk/PrimaryButtonWarpsSlider 0
+      Gtk/ToolbarStyle 3
+      Gtk/MenuImages 1
+      Gtk/ButtonImages 1
+      Gtk/CursorThemeSize 24
+      Gtk/CursorThemeName "breeze_cursors"
+      Net/IconThemeName "Numix"
+      Gtk/FontName "Noto Sans,  10"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/skel/.config/kactivitymanagerdrc config
+  copy:
+    dest: /etc/skel/.config/kactivitymanagerdrc
+    content: |
+      [activities]
+      4d927081-df3c-4eef-b331-0fbef0f15de4=Standard
+
+      [main]
+      currentActivity=4d927081-df3c-4eef-b331-0fbef0f15de4
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc config
+  copy:
+    dest: /etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+    content: |
+      [ActionPlugins][0]
+      MiddleButton;NoModifier=org.kde.paste
+      RightButton;NoModifier=org.kde.contextmenu
+      wheel:Vertical;NoModifier=org.kde.switchdesktop
+
+      [ActionPlugins][1]
+      RightButton;NoModifier=org.kde.contextmenu
+
+      [Containments][17]
+      activityId=4d927081-df3c-4eef-b331-0fbef0f15de4
+      formfactor=0
+      immutability=1
+      lastScreen=0
+      location=0
+      plugin=org.kde.plasma.folder
+      wallpaperplugin=org.kde.image
+
+      [Containments][17][ConfigDialog]
+      DialogHeight=540
+      DialogWidth=720
+
+      [Containments][17][Configuration]
+      PreloadWeight=26
+
+      [Containments][17][General]
+      iconSize=2
+
+      [Containments][17][Wallpaper][org.kde.image][General]
+      Image=file:///usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png
+      SlidePaths=/usr/share/wallpapers
+
+      [Containments][2]
+      activityId=
+      formfactor=2
+      immutability=1
+      lastScreen=0
+      location=4
+      plugin=org.kde.panel
+      wallpaperplugin=org.kde.image
+
+      [Containments][2][Applets][14]
+      immutability=1
+      plugin=org.kde.plasma.digitalclock
+
+      [Containments][2][Applets][14][Configuration]
+      PreloadWeight=26
+
+      [Containments][2][Applets][15]
+      immutability=1
+      plugin=org.kde.plasma.showdesktop
+
+      [Containments][2][Applets][15][Configuration]
+      PreloadWeight=26
+
+      [Containments][2][Applets][3]
+      immutability=1
+      plugin=org.kde.plasma.kickoff
+
+      [Containments][2][Applets][3][Configuration]
+      PreloadWeight=86
+
+      [Containments][2][Applets][3][Configuration][General]
+      favoritesPortedToKAstats=true
+
+      [Containments][2][Applets][3][Configuration][Shortcuts]
+      global=Alt+F1
+
+      [Containments][2][Applets][3][Shortcuts]
+      global=Alt+F1
+
+      [Containments][2][Applets][4]
+      immutability=1
+      plugin=org.kde.plasma.pager
+
+      [Containments][2][Applets][4][Configuration]
+      PreloadWeight=26
+
+      [Containments][2][Applets][5]
+      immutability=1
+      plugin=org.kde.plasma.icontasks
+
+      [Containments][2][Applets][5][Configuration]
+      PreloadWeight=26
+
+      [Containments][2][Applets][5][Configuration][General]
+      launchers=applications:systemsettings.desktop,applications:org.kde.discover.desktop,preferred://filemanager,preferred://browser,applications:org.kde.konsole.desktop
+
+      [Containments][2][Applets][6]
+      immutability=1
+      plugin=org.kde.plasma.marginsseparator
+
+      [Containments][2][Applets][6][Configuration]
+      PreloadWeight=26
+
+      [Containments][2][Applets][7]
+      immutability=1
+      plugin=org.kde.plasma.systemtray
+
+      [Containments][2][Applets][7][Configuration]
+      PreloadWeight=31
+      SystrayContainmentId=8
+
+      [Containments][2][Configuration]
+      PreloadWeight=26
+
+      [Containments][2][General]
+      AppletOrder=3;4;5;6;7;14;15
+
+      [Containments][8]
+      activityId=
+      formfactor=2
+      immutability=1
+      lastScreen=0
+      location=4
+      plugin=org.kde.plasma.private.systemtray
+      wallpaperplugin=org.kde.image
+
+      [Containments][8][Applets][10]
+      immutability=1
+      plugin=org.kde.plasma.devicenotifier
+
+      [Containments][8][Applets][10][Configuration]
+      PreloadWeight=26
+
+      [Containments][8][Applets][11]
+      immutability=1
+      plugin=org.kde.plasma.manage-inputmethod
+
+      [Containments][8][Applets][11][Configuration]
+      PreloadWeight=26
+
+      [Containments][8][Applets][12]
+      immutability=1
+      plugin=org.kde.plasma.notifications
+
+      [Containments][8][Applets][12][Configuration]
+      PreloadWeight=26
+
+      [Containments][8][Applets][13]
+      immutability=1
+      plugin=org.kde.plasma.keyboardlayout
+
+      [Containments][8][Applets][13][Configuration]
+      PreloadWeight=26
+
+      [Containments][8][Applets][16]
+      immutability=1
+      plugin=org.kde.plasma.battery
+
+      [Containments][8][Applets][16][Configuration]
+      PreloadWeight=26
+
+      [Containments][8][Applets][17]
+      immutability=1
+      plugin=org.kde.plasma.networkmanagement
+
+      [Containments][8][Applets][17][Configuration]
+      PreloadWeight=26
+
+      [Containments][8][Applets][9]
+      immutability=1
+      plugin=org.kde.plasma.clipboard
+
+      [Containments][8][Applets][9][Configuration]
+      PreloadWeight=26
+
+      [Containments][8][Configuration]
+      PreloadWeight=26
+
+      [Containments][8][General]
+      extraItems=org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.manage-inputmethod,org.kde.plasma.notifications,org.kde.plasma.mediacontroller,org.kde.plasma.networkmanagement,org.kde.plasma.battery,org.kde.plasma.keyboardlayout
+      knownItems=org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.manage-inputmethod,org.kde.plasma.notifications,org.kde.plasma.mediacontroller,org.kde.plasma.networkmanagement,org.kde.plasma.battery,org.kde.plasma.keyboardlayout
+
+      [ScreenMapping]
+      itemsOnDisabledScreens=
+      {% raw %}screenMapping=desktop:/chromium.desktop,0,desktop:/konsole.desktop,0{% endraw %}
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/skel/.config/kscreenlockerrc config
+  copy:
+    dest: /etc/skel/.config/kscreenlockerrc
+    content: |
+      [$Version]
+      update_info=kscreenlocker.upd:0.1-autolock
+
+      [Greeter]
+      WallpaperPlugin=org.kde.image
+
+      [Greeter][Wallpaper][org.kde.image][General]
+      Image=file:///usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/skel/.config/konsolerc config
+  copy:
+    dest: /etc/skel/.config/konsolerc
+    content: |
+      [Favorite Profiles]
+      Favorites=EdBox.profile
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/skel/.local dir
+  file:
+    path: /etc/skel/.local
+    state: directory
+    mode: 0755
+
+- name: /etc/skel/.local/share dir
+  file:
+    path: /etc/skel/.local/share
+    state: directory
+    mode: 0755
+
+- name: /etc/skel/.local/share/konsole dir
+  file:
+    path: /etc/skel/.local/share/konsole
+    state: directory
+    mode: 0755
+
+- name: /etc/skel/.local/share/konsole/EdBox.profile config file
+  copy:
+    dest: /etc/skel/.local/share/konsole/EdBox.profile
+    content: |
+      [Appearance]
+      ColorScheme=WhiteOnBlack
+      Font=Hack,12,-1,5,50,0,0,0,0,0
+
+      [General]
+      Command=/bin/bash
+      Name=EdBox
+      Parent=FALLBACK/      
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/xdg dir
+  file:
+    path: /etc/xdg
+    state: directory
+    mode: 0755
+
+- name: /etc/xdg/plasmarc config
+  copy:
+    dest: /etc/xdg/plasmarc
+    content: |
+      [Theme]
+      name=Numix
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/xdg/kdeglobals config
+  copy:
+    dest: /etc/xdg/kdeglobals
+    content: |
+      [General]
+      ColorScheme=Numix
+      Name=Numix
+
+      [Icons]
+      Theme=Numix-Circle
+
+      [KDE]
+      SingleClick=false
+      ChangeCursor=true
+      ColorScheme=Numix
+      contrast=7
+      LookAndFeelPackage=org.numixproject.kde
+      widgetStyle=breeze
+    owner: root
+    group: root
+    mode: 0644
+
+- name: /etc/xdg/konsolerc config
+  copy:
+    dest: /etc/xdg/konsolerc
+    content: |
+      [Desktop Entry]
+      DefaultProfile=EdBox.profile
+
+      [Favorite Profiles]
+      Favorites=
+    owner: root
+    group: root
+    mode: 0644
+
+- name: add user {{ box_desktop_user }}
+  user:
+    name: "{{ box_desktop_user }}"
+    shell: /bin/bash
+    password: "{{ box_password | password_hash('sha512') }}"
+    groups: "{{ box_desktop_user_groups }}"
+    append: yes
+    update_password: on_create
+
+- name: xkeyboard only for archlinux
+  copy:
+    dest: "/etc/X11/xorg.conf.d/10-keyboard.conf"
+    content: |
+      Section "InputClass"
+              Identifier "system-keyboard"
+              MatchIsKeyboard "on"
+              Option "XkbLayout" "{{ box_xorg_keymap }}"
+              Option "XkbModel" "{{ box_xorg_keymap_model }}"
+              Option "XkbVariant" "{{ box_xorg_keymap_vatiant }}"
+      EndSection
+  when: ansible_distribution == "Archlinux"
+
+- name: logind pm handler 1
+  command: sed -e "s/^#HandleLidSwitch=.*/HandleLidSwitch=suspend/g" -i /etc/systemd/logind.conf
+
+- name: login pm handler 2
+  command: sed -e "s/^#HandleLidSwitchDocked=.*/HandleLidSwitchDocked=suspend/g" -i /etc/systemd/logind.conf
+
+- name: desktop user directory
+  file:
+    path: "/home/{{ box_desktop_user }}/Desktop"
+    state: directory
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: create desktop link
+  file:
+    src: "/home/{{ box_desktop_user }}/Desktop"
+    dest: "/home/{{ box_desktop_user }}/Schreibtisch"
+    state: link
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: chrome without desktop entry
+  copy:
+    dest: "/home/{{ box_desktop_user }}/Desktop/chromium.desktop"
+    content: |
+      [Desktop Entry]
+      Encoding=UTF-8
+      Version=1.0
+      Type=Application
+      Terminal=false
+      Name[en_US]=Chromium
+      Name[de_DE]=Chromium
+      Exec={{ chrome_bin }} --restore-last-session
+      Icon={{ chrome_icon }}
+      Name=Chromium
+    mode: 0744
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: mate terminal
+  copy:
+    dest: "/home/{{ box_desktop_user }}/Desktop/konsole.desktop"
+    content: |
+      [Desktop Entry]
+      Encoding=UTF-8
+      Version=1.0
+      Type=Application
+      Terminal=false
+      Name[en_US]=konsole
+      Name[de_DE]=konsole
+      Exec=konsole
+      Icon=utilities-terminal
+      Name=Konsole
+    mode: 0744
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: user bashrc HISTSIZE
+  lineinfile:
+    path: "/home/{{ box_desktop_user }}/.bashrc"
+    regexp: '^HISTSIZE='
+    line: HISTSIZE=10000
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: user bashrc HISTFILESIZE
+  lineinfile:
+    path: "/home/{{ box_desktop_user }}/.bashrc"
+    regexp: '^HISTFILESIZE='
+    line: HISTFILESIZE=20000
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: make vim the default vi
+  copy:
+    dest: "/etc/profile.d/vimdefault.sh"
+    content: |
+      alias vi="vim"
+
+- name: dircolors
+  copy:
+    dest: "/etc/profile.d/dircolors.sh"
+    content: |
+      alias ls='ls --color=auto'
+  
+- name: modprobe usb storage conf
+  copy:
+    dest: "/etc/modprobe.d/edboxes.conf"
+    content: |
+      options usb-storage delay_use=3
+    mode: 0644
+
+- name: create chrome policy directory
+  file:
+    path: /etc/opt/chrome/policies/managed
+    state: directory
+    mode: 0775
+
+- name: google chrome ublock policy
+  copy:
+    dest: "/etc/opt/chrome/policies/managed/ublock.json"
+    content: |
+      {
+        "ExtensionInstallForcelist": 
+          ["cjpalhdlnbpafiamejdnhcphjbkeiagm;https://clients2.google.com/service/update2/crx"]
+      }
+    mode: 0644
+
+- name: create chromium policy directory
+  file:
+    path: /etc/chromium/policies/managed
+    state: directory
+    mode: 0775
+
+- name: google chromium ublock policy
+  copy:
+    dest: "/etc/chromium/policies/managed/ublock.json"
+    content: |
+      {
+        "ExtensionInstallForcelist": 
+          ["cjpalhdlnbpafiamejdnhcphjbkeiagm;https://clients2.google.com/service/update2/crx"]
+      }
+    mode: 0644
+
+
+- name: Udev rule for spice desktop reize events
+  copy:
+    dest: "/etc/udev/rules.d/50-x-resize.rules"
+    content: |
+      ACTION=="change",KERNEL=="card0", SUBSYSTEM=="drm", RUN+="/usr/local/bin/x-resize" 
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Script for resolution change in VM
+  copy:
+    dest: "/usr/local/bin/x-resize"
+    content: |
+      #! /bin/sh 
+      PATH=/usr/bin
+      desktopuser=$(/bin/ps -ef  | /bin/grep -oP '^\w+ (?=.*vdagent( |$))') || exit 0
+      export DISPLAY=:0
+      export XAUTHORITY=$(eval echo "~$desktopuser")/.Xauthority
+      xrandr --output $(xrandr | awk '/ connected/{print $1; exit; }') --auto      
+    mode: 0755
+    owner: root
+    group: root
+

@@ -1,0 +1,229 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: include common vars
+  include_vars: "desktop.yml"
+
+- name: add user {{ box_desktop_user }}
+  user:
+    name: "{{ box_desktop_user }}"
+    shell: /bin/bash
+    password: "{{ box_password | password_hash('sha512') }}"
+    groups: "{{ box_desktop_user_groups }}"
+    append: yes
+    update_password: on_create
+
+- name: copy mate schema overrides
+  copy:
+    src: "files/{{ mate_gschema_overrides }}"
+    dest: "/usr/share/glib-2.0/schemas/{{ mate_gschema_overrides }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: glib compile schemas
+  command: '/usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas/'
+  tags:
+    - skip_ansible_lint
+  become: yes
+
+- name: xkeyboard only for archlinux
+  copy:
+    dest: "/etc/X11/xorg.conf.d/10-keyboard.conf"
+    content: |
+      Section "InputClass"
+              Identifier "system-keyboard"
+              MatchIsKeyboard "on"
+              Option "XkbLayout" "{{ box_xorg_keymap }}"
+              Option "XkbModel" "{{ box_xorg_keymap_model }}"
+              Option "XkbVariant" "{{ box_xorg_keymap_vatiant }}"
+      EndSection
+  when: ansible_distribution == "Archlinux"
+
+- name: logind pm handler 1
+  command: sed -e "s/^#HandleLidSwitch=.*/HandleLidSwitch=suspend/g" -i /etc/systemd/logind.conf
+
+- name: login pm handler 2
+  command: sed -e "s/^#HandleLidSwitchDocked=.*/HandleLidSwitchDocked=suspend/g" -i /etc/systemd/logind.conf
+
+- name: desktop user directory
+  file:
+    path: "/home/{{ box_desktop_user }}/Desktop"
+    state: directory
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: create desktop link
+  file:
+    src: "/home/{{ box_desktop_user }}/Desktop"
+    dest: "/home/{{ box_desktop_user }}/Schreibtisch"
+    state: link
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: chrome without desktop entry
+  copy:
+    dest: "/home/{{ box_desktop_user }}/Desktop/chromium.desktop"
+    content: |
+      [Desktop Entry]
+      Encoding=UTF-8
+      Version=1.0
+      Type=Application
+      Terminal=false
+      Name[en_US]=Chromium
+      Name[de_DE]=Chromium
+      Exec={{ chrome_bin }} --restore-last-session
+      Icon={{ chrome_icon }}
+      Name=Chromium
+    mode: 0744
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: mate terminal
+  copy:
+    dest: "/home/{{ box_desktop_user }}/Desktop/mate-terminal.desktop"
+    content: |
+      [Desktop Entry]
+      Encoding=UTF-8
+      Version=1.0
+      Type=Application
+      Terminal=false
+      Name[en_US]=mate-terminal
+      Name[de_DE]=mate-terminal
+      Exec=mate-terminal
+      Icon=utilities-terminal.png
+      Name=Terminal
+    mode: 0744
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: user bashrc HISTSIZE
+  lineinfile:
+    path: "/home/{{ box_desktop_user }}/.bashrc"
+    regexp: '^HISTSIZE='
+    line: HISTSIZE=10000
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: user bashrc HISTFILESIZE
+  lineinfile:
+    path: "/home/{{ box_desktop_user }}/.bashrc"
+    regexp: '^HISTFILESIZE='
+    line: HISTFILESIZE=20000
+  become: yes
+  become_user: "{{ box_desktop_user }}"
+
+- name: make vim the default vi
+  copy:
+    dest: "/etc/profile.d/vimdefault.sh"
+    content: |
+      alias vi="vim"
+
+- name: dircolors
+  copy:
+    dest: "/etc/profile.d/dircolors.sh"
+    content: |
+      alias ls='ls --color=auto'
+  
+- name: modprobe usb storage conf
+  copy:
+    dest: "/etc/modprobe.d/edboxes.conf"
+    content: |
+      options usb-storage delay_use=3
+    mode: 0644
+
+- name: create chrome policy directory
+  file:
+    path: /etc/opt/chrome/policies/managed
+    state: directory
+    mode: 0775
+
+- name: google chrome ublock policy
+  copy:
+    dest: "/etc/opt/chrome/policies/managed/ublock.json"
+    content: |
+      {
+        "ExtensionInstallForcelist": 
+          ["cjpalhdlnbpafiamejdnhcphjbkeiagm;https://clients2.google.com/service/update2/crx"]
+      }
+    mode: 0644
+
+- name: create chromium policy directory
+  file:
+    path: /etc/chromium/policies/managed
+    state: directory
+    mode: 0775
+
+- name: google chromium ublock policy
+  copy:
+    dest: "/etc/chromium/policies/managed/ublock.json"
+    content: |
+      {
+        "ExtensionInstallForcelist": 
+          ["cjpalhdlnbpafiamejdnhcphjbkeiagm;https://clients2.google.com/service/update2/crx"]
+      }
+    mode: 0644
+
+- name: create firefox policy directory
+  file:
+    path: /etc/firefox/policies
+    state: directory
+    mode: 0775
+
+- name: firefox system policy
+  copy:
+    dest: "/etc/firefox/policies/policies.json"
+    content: |
+      {
+        "policies": {
+          "BlockAboutAddons": true,
+          "BlockAboutConfig": true,
+          "DisableAppUpdate": true,
+          "ExtensionSettings": {
+            "uBlock0@raymondhill.net": {
+              "install_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi",
+              "installation_mode": "force_installed"
+            }
+          }
+        }
+      }      
+    mode: 0644
+
+- name: Udev rule for spice desktop reize events
+  copy:
+    dest: "/etc/udev/rules.d/50-x-resize.rules"
+    content: |
+      ACTION=="change",KERNEL=="card0", SUBSYSTEM=="drm", RUN+="/usr/local/bin/x-resize"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Script for resolution change in VM
+  copy:
+    dest: "/usr/local/bin/x-resize"
+    content: |
+      #! /bin/sh 
+      PATH=/usr/bin
+      desktopuser=$(/bin/ps -ef  | /bin/grep -oP '^\w+ (?=.*vdagent( |$))') || exit 0
+      export DISPLAY=:0
+      export XAUTHORITY=$(eval echo "~$desktopuser")/.Xauthority
+      xrandr --output $(xrandr | awk '/ connected/{print $1; exit; }') --auto
+    mode: 0755
+    owner: root
+    group: root
+

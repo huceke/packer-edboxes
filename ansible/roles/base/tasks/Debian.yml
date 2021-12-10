@@ -1,0 +1,86 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: install base for apt-key
+  package:
+    name:
+      - gpg
+      - gpg-agent
+      - ca-certificates
+    state: present
+
+- name: enable repo non free
+  apt_repository:
+    repo: deb http://deb.debian.org/debian stable main contrib non-free
+    state: present
+    update_cache: yes
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: apt-get update
+  shell: apt-get update
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: server packages
+  package:
+    name:
+      - vim
+      - firmware-linux
+      - firmware-misc-nonfree
+      - console-data
+      - software-properties-common
+      - ntfs-3g
+      - ufw
+      - qemu-guest-agent
+      - spice-vdagent
+      - sudo
+      - network-manager
+      - pciutils
+      - firmware-intelwimax
+      - firmware-iwlwifi
+      - firmware-brcm80211
+      - firmware-ralink
+      - firmware-zd1211
+      - atmel-firmware
+      - firmware-atheros
+      - ipset
+      - openssh-client
+      - openssh-server
+      - python3-psutil
+      - acl
+      - sshpass
+
+- name: cleanup apt cache
+  command: apt-get clean
+  become: yes
+
+- name: EFI boot fix
+  block:
+    - name: EFI create /boot/efi/EFI/Boot
+      file:
+        path: '/boot/efi/EFI/Boot'
+        state: directory
+    - name: EFI copy /boot/efi/EFI/debian/grubx64.efi -> /boot/efi/EFI/Boot/Bootx64.efi
+      copy:
+        src: '/boot/efi/EFI/debian/grubx64.efi'
+        dest: '/boot/efi/EFI/Boot/Bootx64.efi'
+        remote_src: yes
+  when: box_boottype == "efi"

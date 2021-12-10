@@ -1,0 +1,60 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: EXIT - not supported OS found
+  fail:
+    msg: "Unsupported OS {{ ansible_distribution }} {{ ansible_distribution_version }}"
+  when:
+    - ansible_distribution != "AlmaLinux"
+    - ansible_distribution != "Rocky"
+    - ansible_distribution != "Debian"
+    - ansible_distribution != "Ubuntu"
+    - ansible_distribution != "RedHat"
+    - ansible_distribution != "Fedora"
+    - ansible_distribution != "Archlinux"
+
+- name: include common vars
+  include_vars: "Common.yml"
+
+- name: include distribution specific vars
+  include_vars: "{{ ansible_distribution }}.yml"
+
+- name: include distribution specific install
+  include: "{{ ansible_distribution }}.yml"
+
+- name: add user {{ system_user }}
+  user:
+    name: "{{ system_user }}"
+    shell: /bin/bash
+    password: "{{ box_password | password_hash('sha512') }}"
+    groups: "{{ system_user_groups }}"
+    append: yes
+    update_password: on_create
+
+- name: vim settings
+  copy:
+    dest: "{{ vimrc }}"
+    content: |
+      set smartindent
+      set tabstop=2
+      set shiftwidth=2
+      set expandtab
+      autocmd BufEnter * set mouse=
+      set mouse=
+      set ttymouse=
+

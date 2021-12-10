@@ -1,0 +1,100 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: puppet repo
+  command: dnf install -y https://yum.puppetlabs.com/puppet-release-el-8.noarch.rpm
+  become: yes
+
+- name: install base packages
+  package:
+    name:
+      - gpg
+      - chrony
+      - rsyslog
+      - acpid
+      - qemu-guest-agent
+      - cloud-init
+      - cloud-utils-growpart
+      - tar
+      - puppet-agent
+    state: present
+
+- name: remove unneeded
+  package:
+    name: 
+      - linux-firmware
+    state: absent
+
+- name: enable qemu guest agent
+  systemd:
+    name: qemu-guest-agent
+    enabled: yes
+
+- name: enable cloud init
+  systemd:
+    name: cloud-init
+    enabled: yes
+
+- name: enable sshd
+  systemd:
+    name: sshd
+    enabled: yes
+
+- name: enable rsyslog
+  systemd:
+    name: rsyslog
+    enabled: yes
+
+- name: enable chrony
+  systemd:
+    name: chronyd
+    enabled: yes
+
+- name: enable acpid
+  systemd:
+    name: acpid
+    enabled: yes
+
+- name: disable kdump
+  systemd:
+    name: kdump
+    enabled: no
+
+- name: chrome without proxy desktop entry
+  copy:
+    dest: "/etc/sysconfig/network"
+    content: |
+      NETWORKING=yes
+      NOZEROCONF=yes
+    mode: 0644
+  become: yes
+
+- name: chrome without proxy desktop entry
+  copy:
+    dest: "/etc/tuned/active_profile"
+    content: |
+      virtual-guest
+    mode: 0644
+  become: yes
+
+- name: redoce vts
+  command: sed -e "s/^#NAutoVTs=.*/NAutoVTs=0/g" -i /etc/systemd/logind.conf
+
+- name: cleanup dnf cacche
+  command: dnf clean all
+  become: yes

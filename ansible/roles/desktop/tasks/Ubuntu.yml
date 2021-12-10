@@ -1,0 +1,271 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: install base for apt-key
+  apt:
+    name:
+      - gpg
+      - gpg-agent
+      - ca-certificates
+    state: present
+    install_recommends: no
+
+- name: add google apt key
+  apt_key:
+    url: https://dl-ssl.google.com/linux/linux_signing_key.pub
+    state: present
+
+- name: enable repo main restricted universe multiverse
+  apt_repository:
+    repo: deb http://de.archive.ubuntu.com/ubuntu focal main restricted universe multiverse 
+    state: present
+    update_cache: yes
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: enable repo updates main restricted universe multiverse
+  apt_repository:
+    repo: deb http://de.archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse 
+    state: present
+    update_cache: yes
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: enable repo security main restricted universe multiverse
+  apt_repository:
+    repo: deb http://de.archive.ubuntu.com/ubuntu focal-security main restricted universe multiverse 
+    state: present
+    update_cache: yes
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: enable repo backports main restricted universe multiverse
+  apt_repository:
+    repo: deb http://de.archive.ubuntu.com/ubuntu focal-backports main restricted universe multiverse 
+    state: present
+    update_cache: yes
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: enable repo google chrome
+  apt_repository:
+    repo: deb http://dl.google.com/linux/chrome/deb/ stable main
+    state: present
+    filename: google-chrome
+    update_cache: yes
+  register: result
+  until: result.failed == false
+  retries: 3
+
+#- name: apt-get update
+#  shell: apt-get update
+#  register: result
+#  until: result.failed == false
+#  retries: 3
+
+- name: update apt cache
+  apt:
+    update_cache: yes
+
+- name: apt-get update
+  shell: apt-get update
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: packages
+  apt:
+    name:
+      - vim
+      - linux-firmware
+      - console-data
+      - software-properties-common
+      - ntfs-3g
+      - ufw
+      - xorg
+      - xdg-user-dirs
+      - xdg-user-dirs-gtk
+      - xdg-utils
+      - xfonts-100dpi
+      - xfonts-75dpi
+      - xserver-xorg-video-qxl
+      - mate
+      - mate-terminal
+      - mate-screensaver
+      - mate-backgrounds
+      - mate-utils-common
+      - mate-utils
+      - ssh-askpass
+      - exfat-utils
+      - qemu-guest-agent
+      - spice-vdagent
+      - sudo
+      - remmina
+      - remmina-plugin-rdp
+      - mate-power-manager
+      - mate-applets
+      - network-manager
+      - network-manager-gnome
+      - evince
+      - telnetd
+      - mate-desktop-environment
+      - mate-notification-daemon
+      - pciutils
+      - lightdm
+      - slick-greeter
+      - google-chrome-stable
+      - numix-gtk-theme
+      - numix-icon-theme
+      - firefox
+      - firefox-locale-de
+      - libnss3-tools
+      - password-gorilla
+      - nmap
+      - wireshark
+      - wireshark-gtk
+      - iptraf-ng
+      - ipset
+      - gufw
+      - openssh-client
+      - openssh-server
+      - terminator
+      - vim-gtk3
+      - gedit
+      - rsync
+      - locate
+      - python-psutil
+      - dconf-cli
+      - python3-psutil
+      - acl
+      - icedtea-netx
+      - fonts-dejavu
+      - fonts-cantarell
+      - libreoffice 
+      - libreoffice-l10n-de 
+      - libreoffice-gtk2
+      - language-pack-de
+      - wswiss
+      - hunspell-de-ch-frami
+      - mythes-de
+      - libreoffice-help-de
+      - hyphen-de
+      - wogerman
+      - language-pack-gnome-de
+      - language-pack-gnome-de-base
+      - libreoffice-help-common
+      - libreoffice-gtk3
+      - hunspell-de-de-frami
+      - wngerman
+      - gnome-user-docs-de
+      - hunspell-de-at-frami
+      - mythes-de-ch
+      - libgtk2.0-0
+    install_recommends: no
+
+- name: purge unwanted packages
+  apt:
+    name:
+      - ibus 
+      - ibus-data
+      - ibus-gtk3
+      - ibus-gtk
+      - python3-ibus-1.0
+      - ubuntu-server
+      - cloud-init
+      - cloud-guest-utils
+      - cloud-initramfs-copymods
+      - cloud-initramfs-dyn-netconf
+      - overlayroot
+      - lxd-agent-loader
+      - snapd
+    state: absent
+    purge: yes
+
+- name: generate custom lightdm config
+  copy:
+    dest: "/etc/lightdm/lightdm.conf.d/50-myconfig.conf"
+    content: |
+      [Seat:*]
+      user-session=mate
+      greeter-session=slick-greeter
+      greeter-hide-users=true
+    mode: 0644
+  become: yes
+
+- name: lightdm background
+  copy:
+    dest: "/etc/lightdm/slick-greeter.conf"
+    content: |
+      [Greeter]
+      background=/usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png
+    mode: 0644
+  become: yes
+
+- name: make lightdm default
+  copy:
+    dest:  "/etc/X11/default-display-manager"
+    content: |
+      /usr/sbin/lightdm
+    mode: 0644
+  become: yes
+
+- name: reconfigure lightdm
+  shell: DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true dpkg-reconfigure lightdm
+  become: yes
+
+- name: enable login manger
+  systemd:
+    name: lightdm
+    enabled: yes
+
+- name: enable ufw
+  systemd:
+    name: ufw
+    enabled: yes
+
+- name: cleanup apt cache
+  command: apt-get clean
+  become: yes
+
+#- name: cleanup apt cache
+#  apt:
+#    autoclean: yes
+
+- name: empty netplan directory
+  file:
+    state: "{{ item }}"
+    path: "/etc/netplan/"
+    mode: 0755
+  with_items:
+    - absent
+    - directory
+  become: yes
+    
+- name: cange netplan renderer to network-manager for desktop
+  copy:
+    dest: "/etc/netplan/01-netcfg.yaml"
+    content: |
+      network:
+        version: 2
+        renderer: NetworkManager      
+    mode: 0644
+  become: yes

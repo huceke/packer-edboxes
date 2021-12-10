@@ -1,0 +1,35 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+box_distribution: debian
+box_name: debian
+box_addon:  []
+box_boottype: efi
+box_encrypt: none
+box_password: changeme1234
+box_desktop_user: changeme
+box_ansible_run: yes
+box_packer_run: no
+box_packer_headless: "false"
+box_disk_size: 16384M
+box_locale: "de_DE.UTF-8"
+box_timezone: "Europe/Vienna"
+box_keymap: "de-latin1-nodeadkeys"
+box_xorg_keymap: "de"
+box_xorg_keymap_model: "pc105"
+box_xorg_keymap_vatiant: "nodeadkeys"

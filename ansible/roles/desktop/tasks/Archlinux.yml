@@ -1,0 +1,162 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: install base packages
+  package:
+    name:
+      - vim
+      - ufw
+    state: present
+
+- name: trizen build dependencies
+  package:
+    name:
+      - git
+      - base-devel
+
+- git:
+    repo: https://aur.archlinux.org/trizen.git
+    dest: /tmp/trizen
+  become_user: vagrant
+
+- name: trizen build
+  command: makepkg --noconfirm --force --install --syncdeps
+  become: yes
+  args:
+    chdir: /tmp/trizen
+  become_user: vagrant
+    
+- name: desktop packages
+  package:
+    name:
+      - xorg
+      - xorg-server
+      - xorg-apps
+      - xorg-xinit
+      - gsfonts
+      - xf86-input-vmmouse
+      - xf86-input-evdev
+      - xf86-input-libinput
+      - xf86-input-synaptics
+      - xf86-video-qxl
+      - xf86-video-fbdev
+      - xf86-video-amdgpu
+      - xf86-video-ati
+      - xf86-video-intel
+      - xf86-video-nouveau
+      - xf86-video-vmware
+      - pipewire
+      - pipewire-jack
+      - pipewire-alsa
+      - pipewire-media-session
+      - pipewire-pulse
+      - xdg-desktop-portal
+      - xdg-desktop-portal-gtk
+      - mate
+      - mate-extra
+      - mate-terminal
+      - mate-media
+      - eom
+      - network-manager-applet
+      - accountsservice
+      - spice-vdagent
+      - qemu-guest-agent
+      - remmina
+      - networkmanager
+      - evince
+      - pciutils
+      - lightdm
+      - chromium
+      - firefox
+      - nmap
+      - wireshark-cli
+      - wireshark-qt
+      - iptraf-ng
+      - ipset
+      - gufw
+      - terminator
+      - gedit
+      - rsync
+      - python-psutil
+      - dconf
+      - python-psutil
+      - acl
+      - icedtea-web
+      - netctl
+      - parted
+      - mdadm
+      - postfix
+      - nfs-utils
+      - nfsidmap
+      - ethtool
+      - ttf-dejavu
+      - cantarell-fonts
+      - libreoffice-fresh
+      - libreoffice-fresh-de
+
+- name: numix icon theme
+  command: trizen -S numix-icon-theme-git --noedit --noconfirm --sync
+  become_user: vagrant
+
+- name: numix gtk theme
+  command: trizen -S numix-gtk-theme --noedit --noconfirm --sync
+  become_user: vagrant
+
+- name: password gorilla
+  command: trizen -S password-gorilla --noedit --noconfirm --sync
+  become_user: vagrant
+
+- name: pygtk
+  command: trizen -S pygtk --noedit --noconfirm --sync
+  become_user: vagrant
+
+- name: lightdm-slick-greeter
+  command: trizen -S lightdm-slick-greeter --noedit --noconfirm --sync
+  become_user: vagrant
+
+- name: enable login manger
+  systemd:
+    name: lightdm
+    enabled: yes
+
+- name: loginmanager theme
+  command: sed -e 's/#greeter-session=.*/greeter-session=lightdm-slick-greeter/g' -i /etc/lightdm/lightdm.conf
+
+- name: loginmanager hide userlist
+  command: sed -e 's/#greeter-hide-users=.*/greeter-hide-users=true/g' -i /etc/lightdm/lightdm.conf
+
+- name: lightdm background
+  copy:
+    dest: "/etc/lightdm/slick-greeter.conf"
+    content: |
+      [Greeter]
+      background=/usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png
+    mode: 0644
+  become: yes
+
+- name: sudo setting
+  command: sed "s/# %wheel/%wheel/" -i /etc/sudoers
+
+- name: enable ufw
+  systemd:
+    name: ufw
+    enabled: yes
+
+- name: cleanup pacman cache
+  command: sh -c "yes | pacman -Scc"
+  become: yes

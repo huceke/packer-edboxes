@@ -1,0 +1,74 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: update system
+  command: pacman -Suy --noconfirm
+  become: yes
+
+- name: archlinux-keyring
+  command: pacman -S --noconfirm archlinux-keyring
+  become: yes
+
+- name: install base packages
+  package:
+    name:
+      - vim
+      - ufw
+    state: present
+
+- name: trizen build dependencies
+  package:
+    name:
+      - git
+      - base-devel
+
+- git:
+    repo: https://aur.archlinux.org/trizen.git
+    dest: /tmp/trizen
+  become_user: vagrant
+
+- name: trizen build
+  command: makepkg --noconfirm --force --install --syncdeps
+  become: yes
+  args:
+    chdir: /tmp/trizen
+  become_user: vagrant
+    
+- name: server packages
+  package:
+    name:
+      - spice-vdagent
+      - qemu-guest-agent
+      - networkmanager
+      - pciutils
+      - acl
+      - netctl
+      - parted
+      - mdadm
+      - postfix
+      - nfs-utils
+      - nfsidmap
+      - ethtool
+      - sshpass
+
+- name: sudo setting
+  command: sed "s/# %wheel/%wheel/" -i /etc/sudoers
+
+- name: cleanup pacman cache
+  command: sh -c "yes | pacman -Scc"
+  become: yes

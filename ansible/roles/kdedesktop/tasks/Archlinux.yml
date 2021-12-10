@@ -1,0 +1,137 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: install base packages
+  package:
+    name:
+      - vim
+      - ufw
+    state: present
+
+- name: trizen build dependencies
+  package:
+    name:
+      - git
+      - base-devel
+
+- git:
+    repo: https://aur.archlinux.org/trizen.git
+    dest: /tmp/trizen
+  become_user: vagrant
+
+- name: trizen build
+  command: makepkg --noconfirm --force --install --syncdeps
+  become: yes
+  args:
+    chdir: /tmp/trizen
+  become_user: vagrant
+    
+- name: desktop packages
+  package:
+    name:
+      - xorg
+      - xorg-server
+      - xorg-apps
+      - xorg-xinit
+      - gsfonts
+      - xf86-input-vmmouse
+      - xf86-input-evdev
+      - xf86-input-libinput
+      - xf86-input-synaptics
+      - xf86-video-qxl
+      - xf86-video-fbdev
+      - xf86-video-amdgpu
+      - xf86-video-ati
+      - xf86-video-intel
+      - xf86-video-nouveau
+      - xf86-video-vmware
+      - pipewire
+      - pipewire-jack
+      - pipewire-alsa
+      - pipewire-media-session
+      - pipewire-pulse
+      - network-manager-applet
+      - accountsservice
+      - spice-vdagent
+      - qemu-guest-agent
+      - remmina
+      - networkmanager
+      - evince
+      - pciutils
+      - chromium
+      - nmap
+      - ipset
+      - gufw
+      - gedit
+      - rsync
+      - python-psutil
+      - acl
+      - netctl
+      - parted
+      - mdadm
+      - postfix
+      - nfs-utils
+      - nfsidmap
+      - ethtool
+      - ttf-dejavu
+      - cantarell-fonts
+      - libreoffice-fresh
+      - libreoffice-fresh-de
+      - python2-numpy
+      - sddm
+      - plasma-desktop
+      - plasma-pa
+      - konsole
+      - dolphin
+      - discover
+      - plasma-nm
+      - kwallet
+      - powerdevil
+      - kde-gtk-config
+      - xsettingsd
+      - breeze-gtk
+      - sddm-kcm
+      - mate-backgrounds
+#      - plasma-meta
+#      - kde-applications-meta
+
+- name: enable login manger
+  systemd:
+    name: sddm
+    enabled: yes
+
+- name: sudo setting
+  command: sed "s/# %wheel/%wheel/" -i /etc/sudoers
+
+- name: enable ufw
+  systemd:
+    name: ufw
+    enabled: yes
+
+- name: cleanup pacman cache
+  command: sh -c "yes | pacman -Scc"
+  become: yes
+
+- name: numix gtk theme
+  command: trizen -S numix-gtk-theme-git --noedit --noconfirm --sync
+  become_user: vagrant
+
+- name: numix kde theme
+  command: trizen -S numix-kde-theme-git --noedit --noconfirm --sync
+  become_user: vagrant
+

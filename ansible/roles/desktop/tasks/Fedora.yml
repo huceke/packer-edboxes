@@ -1,0 +1,89 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: install base packages
+  package:
+    name:
+      - gpg
+    state: present
+
+- name: install mate desktop
+  shell: "dnf --allowerasing -y groupinstall mate-desktop"
+  args:
+    warn: false
+
+- name: gtk and icon theme
+  package:
+    name:
+      - numix-gtk-theme
+      - numix-icon-theme
+    state: present
+
+- name: qemu additions
+  package:
+    name:
+      - qemu-guest-agent
+      - xorg-x11-drv-qxl
+      - spice-vdagent
+    state: present
+
+- name: additional apps
+  package:
+    name:
+      - chromium
+      - terminator
+      - remmina
+      - gedit
+      - icedtea-web
+      - dejavu-sans-mono-fonts
+      - abattis-cantarell-fonts
+#      - pangox-compat
+    state: present
+
+- name: loginmanager theme
+  command: sed -e 's/#greeter-session=.*/greeter-session=slick-greeter/g' -i /etc/lightdm/lightdm.conf
+
+- name: loginmanager hide userlist
+  command: sed -e 's/#greeter-hide-users=.*/greeter-hide-users=true/g' -i /etc/lightdm/lightdm.conf
+
+- name: lightdm background
+  copy:
+    dest: "/etc/lightdm/slick-greeter.conf"
+    content: |
+      [Greeter]
+      background=/usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png
+      logo=
+    mode: 0644
+  become: yes
+
+- name: enable login manager
+  systemd:
+    name: lightdm
+    enabled: yes
+
+- name: enable graphical target
+  shell: "systemctl set-default graphical.target"
+
+- name: enable qemu guest agent
+  systemd:
+    name: qemu-guest-agent
+    enabled: yes
+
+- name: cleanup dnf cacche
+  command: dnf clean all
+  become: yes

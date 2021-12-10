@@ -1,0 +1,901 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: boxes build
+  hosts: 127.0.0.1
+  connection: local
+  become: false
+  gather_facts: yes
+
+  vars_files:
+    - "boxconfig.yml"
+
+  vars:
+
+    working_dir: "{{ lookup('env', 'PWD') }}"
+    template_dir: "{{ working_dir }}/source/templates"
+    http_dir: "{{ working_dir }}/build/http"
+    tmp_dir: "{{ working_dir }}/build/tmp"
+    packer_cache: "{{ working_dir }}/build/tmp/packer_cache"
+
+    packer_file: "{{ working_dir }}/build/builder-{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.json"
+
+    builder_http_file:
+      archlinux:  "archbootstrap.sh-{{ box_boottype }}-{{ box_encrypt }}"
+      debian:     "debian10-preseed.cfg-{{ box_boottype }}-{{ box_encrypt }}"
+      ubuntu:     "user-data"
+      fedora:     "fedora35-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
+      rhel8:      "rhel8-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
+      rhel7:      "rhel7-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
+      rocky8:     "rocky8-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
+      almalinux:  "almalinux-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
+
+    builder_http_dst_file: "{{ http_dir }}/{{ builder_http_file[box_distribution] }}"
+
+    builder_template_file:
+      archlinux:  "{{ template_dir }}/http/archbootstrap.sh"
+      debian:     "{{ template_dir }}/http/debian10-preseed.cfg"
+      ubuntu:     "{{ template_dir }}/http/user-data-ubuntu-2004"
+      fedora:     "{{ template_dir }}/http/fedora35-kvm-ks.cfg"
+      rhel8:      "{{ template_dir }}/http/rhel8-kvm-ks.cfg"
+      rhel7:      "{{ template_dir }}/http/rhel7-kvm-ks.cfg"
+      rocky8:     "{{ template_dir }}/http/rocky8-kvm-ks.cfg"
+      almalinux:  "{{ template_dir }}/http/almalinux-kvm-ks.cfg"
+
+    packer_image_dir:
+      archlinux:  "{{ working_dir }}/build/images/archlinux"
+      debian:     "{{ working_dir }}/build/images/debian"
+      ubuntu:     "{{ working_dir }}/build/images/ubuntu"
+      fedora:     "{{ working_dir }}/build/images/fedora"
+      rhel8:      "{{ working_dir }}/build/images/rhel8"
+      rhel7:      "{{ working_dir }}/build/images/rhel7"
+      rocky8:     "{{ working_dir }}/build/images/rocky8"
+      almalinux:  "{{ working_dir }}/build/images/almalinux"
+
+    packer_iso:
+      archlinux:
+        checksum: "md5:c76867784b21d6f70cb156d9d1f113db"
+        urls: 
+          - '"iso/2021.10.01/archlinux-2021.10.01-x86_64.iso",'
+          - '"http://mirror.easyname.at/archlinux/iso/2021.10.01/archlinux-2021.10.01-x86_64.iso"'
+      debian:
+        checksum: "sha256:8488abc1361590ee7a3c9b00ec059b29dfb1da40f8ba4adf293c7a30fa943eb2"
+        urls: 
+          - '"iso/debian-11.1.0-amd64-netinst.iso",'
+          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.1.0-amd64-netinst.iso"'
+      ubuntu:
+        cache_id: "b517145adf12daef464c16d34da03464aa585881"
+        checksum: "sha256:d1f2bf834bbe9bb43faf16f9be992a6f3935e65be0edece1dee2aa6eb1767423"
+        urls: 
+          - '"iso/ubuntu-20.04.2-live-server-amd64.iso",'
+          - '"https://releases.ubuntu.com/20.04/ubuntu-20.04.2-live-server-amd64.iso"'
+      fedora:
+        checksum: "sha256:dd35f955dd5a7054213a0098c6ee737ff116aa3090fc6dbfe89d424b5c3552dd"
+        urls: 
+          - '"iso/Fedora-Server-netinst-x86_64-35-1.2.iso",'
+          - '"https://mirror.karneval.cz/pub/linux/fedora/linux/releases/35/Server/x86_64/iso/Fedora-Server-netinst-x86_64-35-1.2.iso"'
+      rhel8:
+        checksum: "sha256:48f955712454c32718dcde858dea5aca574376a1d7a4b0ed6908ac0b85597811"
+        urls: 
+          - '"iso/rhel-8.4-x86_64-dvd.iso"'
+      rhel7:
+        checksum: "sha256:19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191"
+        urls: 
+          - '"iso/rhel-server-7.9-x86_64-dvd.iso"'
+      rocky8:
+        checksum: "sha256:53a62a72881b931bdad6b13bcece7c3a2d4ca9c4a2f1e1a8029d081dd25ea61f"
+        urls:
+          - '"iso/x86_64/Rocky-8.4-x86_64-boot.iso",'
+          - '"https://download.rockylinux.org/pub/rocky/8/isos/x86_64/Rocky-8.4-x86_64-boot.iso"'
+      almalinux:
+        checksum: "sha256:76e8f56892e6d90706b142868eec51b6b8c015ec3792f8d9e0730da93a2d1162"
+        urls:
+          - '"iso/x86_64/AlmaLinux-8.4-x86_64-boot.iso",'
+          - '"http://almalinux.mirrors.itworxx.de/8.4/isos/x86_64/AlmaLinux-8.4-x86_64-boot.iso"'
+
+    boot_wait:
+      archlinux:  "10s"
+      debian:     "10s"
+      ubuntu:     "2s"
+      fedora:     "10s"
+      rhel8:      "10s"
+      rhel7:      "10s"
+      rocky8:     "10s"
+      almalinux:  "10s"
+
+    boot_command:
+      archlinux:
+        mbr:
+          - '"<enter><wait10><wait10><wait10><wait10><wait10><wait10>",'
+          - '"/usr/bin/curl -O http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait5>",'
+          - '"/usr/bin/bash ./{{ builder_http_file[box_distribution] }}<enter>"'
+        efi:
+          - '"<enter><wait10><wait10><wait10><wait10>",'
+          - '"/usr/bin/curl -O http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait5>",'
+          - '"/usr/bin/bash ./{{ builder_http_file[box_distribution] }}<enter>"'
+      fedora:
+        mbr:
+          - '"<up><wait><tab><wait> inst.text inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait>"'
+        efi:
+          - '"<up><wait>e<wait><down><down><end> inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><leftCtrlOn><x>"'
+      debian:
+        mbr:
+          - '"<esc><wait>",'
+          - '"install <wait>",'
+          - '" preseed/url=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }} <wait>",'
+          - '"debian-installer={{ box_locale }} <wait>",'
+          - '"auto <wait>",'
+          - '"locale={{ box_locale }} <wait>",'
+          - '"kbd-chooser/method={{ box_xorg_keymap }} <wait>",'
+          - '"keyboard-configuration/xkb-keymap={{ box_xorg_keymap }} <wait>",'
+          - '"netcfg/get_hostname={{ box_name }} <wait>",'
+          - '"netcfg/get_domain=localdomain.local ",'
+          - '"netcfg/get_domain=vagrantup.com <wait>",'
+          - '"fb=false <wait>",'
+          - '"debconf/frontend=noninteractive <wait>",'
+          - '"console-setup/ask_detect=false <wait>",'
+          - '"console-keymaps-at/keymap={{ box_xorg_keymap }} <wait>",'
+          - '"grub-installer/bootdev=/dev/vda <wait>",'
+          - '"<enter><wait>"'
+        efi:
+          - '"<wait>c<wait>",'
+          - '"linux /install.amd/vmlinuz ",'
+          - '"url=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }} ",'
+          - '"debian-installer={{ box_locale }} ",'
+          - '"auto ",'
+          - '"locale={{ box_locale }} ",'
+          - '"kbd-chooser/method={{ box_xorg_keymap }} ",'
+          - '"keyboard-configuration/xkb-keymap={{ box_xorg_keymap }} ",'
+          - '"netcfg/get_hostname={{ box_name }} ",'
+          - '"netcfg/get_domain=localdomain.local ",'
+          - '"fb=false ",'
+          - '"debconf/frontend=noninteractive ",'
+          - '"console-setup/ask_detect=false ",'
+          - '"console-keymaps-at/keymap=de <enter>",'
+          - '"initrd /install.amd/initrd.gz<enter>",'
+          - '"boot<enter>"'
+      ubuntu:
+        mbr:
+          - '"<enter><enter><f6><esc><wait>",'
+          - '"<bs><bs><bs><bs><bs><bs>",'
+          - '" autoinstall ds=nocloud-net;s=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/",'
+          - '" --- <enter><wait>"'
+        efi:
+          - '"e<wait><down><down><down><end>",'
+          - '"<bs><bs><bs>",'
+          - '" autoinstall \"ds=nocloud-net;s=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/\"",'
+          - '" --- <wait><f10><wait>"'
+      rhel8:
+        mbr:
+          - '"<up><wait><tab><wait> text ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait>"'
+        efi:
+          - '"<up><wait>e<wait><down><down><end> ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><leftCtrlOn><x>"'
+      rhel7:
+        mbr:
+          - '"<up><wait><tab><wait> text ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait>"'
+        efi:
+          - '"<up><wait>e<wait><down><down><end> ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><leftCtrlOn><x>"'
+      rocky8:
+        mbr:
+          - '"<up><wait><tab><wait> text ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait>"'
+        efi:
+          - '"<up><wait>e<wait><down><down><end> ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><leftCtrlOn><x>"'
+      almalinux:
+        mbr:
+          - '"<up><wait><tab><wait> text ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait>"'
+        efi:
+          - '"<up><wait>e<wait><down><down><end> ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><leftCtrlOn><x>"'
+
+    packer_ansible_install:
+      archlinux:
+        - '"yes | pacman -Suy",'
+        - '"yes | pacman -S ansible"'
+      fedora:
+        - '"dnf install -y python-libselinux ansible"'
+      debian:
+        - '"apt-get -y install ansible",'
+        - '"apt-get -y install ansible-lint",'
+        - '"echo \"vagrant        ALL=(ALL)       NOPASSWD: ALL\" >> /etc/sudoers.d/vagrant"'
+      ubuntu:
+        - '"apt-get -y install ansible",'
+        - '"apt-get -y install ansible-lint",'
+        - '"echo \"vagrant        ALL=(ALL)       NOPASSWD: ALL\" >> /etc/sudoers.d/vagrant"'
+      rhel8:
+        - '""'
+      rhel7:
+        - '""'
+      rocky8:
+        - '"dnf -y install epel-release",'
+        - '"dnf -y install ansible"'
+      almalinux:
+        - '"dnf -y install epel-release",'
+        - '"dnf -y install ansible"'
+
+    packer_pre_ansible_scripts:
+      archlinux:
+        - '"source/script/dummy.sh"'
+      fedora:
+        - '"source/script/dummy.sh"'
+      debian:
+        - '"source/script/dummy.sh"'
+      ubuntu:
+        - '"source/script/dummy.sh"'
+      rhel8:
+        - '"source/script/rhel8-ansible.sh"'
+      rhel7:
+        - '"source/script/rhel7-ansible.sh"'
+      rocky8:
+        - '"source/script/dummy.sh"'
+      almalinux:
+        - '"source/script/dummy.sh"'
+
+    packer_post_ansible_scripts:
+      archlinux:
+        - '"source/script/cleanup.sh"'
+      fedora:
+        - '"source/script/cleanup.sh"'
+      debian:
+        - '"source/script/cleanup.sh"'
+      ubuntu:
+        - '"source/script/cleanup.sh"'
+      rhel8:
+        - '"source/script/rhel8-ansible-post.sh",'
+        - '"source/script/cleanup.sh"'
+      rhel7:
+        - '"source/script/rhel7-ansible-post.sh",'
+        - '"source/script/cleanup.sh"'
+      rocky8:
+        - '"source/script/cleanup.sh"'
+      almalinux:
+        - '"source/script/cleanup.sh"'
+
+    http_encryption_settings:
+      archlinux:
+        none:
+          - 'ENCRYPT=no'
+        luks:
+          - 'ENCRYPT=yes'
+      fedora:
+        none:
+          - 'part pv.4 --grow --size=100'
+        luks:
+          - 'part pv.4 --grow --size=100 --encrypted  --luks-version=luks2 --cipher=aes-xts-plain64 --pbkdf-time=5000 --passphrase={{ box_password }}'
+      debian:
+        none:
+          - '# without crypt'
+          - 'd-i partman-auto/method string lvm'
+        luks:
+          - '# with crypt'
+          - 'd-i partman-auto/method string crypto'
+          - 'd-i partman-crypto/passphrase password {{ box_password }}'
+          - 'd-i partman-crypto/passphrase-again password {{ box_password }}'
+          - 'd-i partman-crypto/weak_passphrase true'
+      ubuntu:
+        none:
+          - '    - name: rootvg_vm'
+          - '      devices: [partition-2]'
+        luks:
+          - '    - {volume: partition-2, keyfile: /tmp/luks-key, preserve: false, type: dm_crypt,'
+          - '      id: dm_crypt-0}'
+          - '    - name: rootvg_vm'
+          - '      devices: [dm_crypt-0]'
+      rhel8:
+        none:
+          - 'part pv.4 --grow --size=100'
+        luks:
+          - 'part pv.4 --grow --size=100 --encrypted  --luks-version=luks2 --cipher=aes-xts-plain64 --pbkdf-time=5000 --passphrase={{ box_password }}'
+      rhel7:
+        none:
+          - 'part pv.4 --grow --size=100'
+        luks:
+          - 'part pv.4 --grow --size=100 --encrypted  --luks-version=luks2 --cipher=aes-xts-plain64 --pbkdf-time=5000 --passphrase={{ box_password }}'
+      rocky8:
+        none:
+          - 'part pv.4 --grow --size=100'
+        luks:
+          - 'part pv.4 --grow --size=100 --encrypted  --luks-version=luks2 --cipher=aes-xts-plain64 --pbkdf-time=5000 --passphrase={{ box_password }}'
+      almalinux:
+        none:
+          - 'part pv.4 --grow --size=100'
+        luks:
+          - 'part pv.4 --grow --size=100 --encrypted  --luks-version=luks2 --cipher=aes-xts-plain64 --pbkdf-time=5000 --passphrase={{ box_password }}'
+
+    http_efi_boot:
+      archlinux:
+        mbr:
+          - 'BOOTTYPE=mbr'
+        efi:
+          - 'BOOTTYPE=efi'
+      fedora:
+        mbr:
+          - ''
+        efi:
+          - ''
+      debian:
+        mbr:
+          - ''
+        efi:
+          - 'd-i partman-efi/non_efi_system boolean true'
+      ubuntu:
+        mbr:
+          - ''
+        efi:
+          - ''
+      rhel8:
+        mbr:
+          - ''
+        efi:
+          - ''
+      rhel7:
+        mbr:
+          - ''
+        efi:
+          - ''
+      rocky8:
+        mbr:
+          - ''
+        efi:
+          - ''
+      almalinux:
+        mbr:
+          - ''
+        efi:
+          - ''
+
+    http_part_settings:
+      archlinux:
+        mbr:
+        efi:
+      fedora:
+        mbr:
+          - 'part /boot --fstype="ext4" --size=1024'
+        efi:
+          - 'part /boot/efi --fstype="efi" --size=512 --fsoptions="umask=0077,shortname=winnt"'
+          - 'part /boot --fstype="ext4" --size=1024'
+      debian:
+        mbr:
+          - '      500 500 500 ext3                                \'
+          - '            $primary{ } $bootable{ }                \'
+          - '              method{ format } format{ }              \'
+          - '               use_filesystem{ } filesystem{ ext4 }    \'
+          - '              mountpoint{ /boot }                     \'
+          - '      .                                               \'
+        efi:
+          - '      538 538 1075 free     \'
+          - '          $iflabel{ gpt }   \'
+          - '          $reusemethod{ }   \'
+          - '          method{ efi }     \'
+          - '          format{ }         \'
+          - '      .                     \'
+          - '      128 512 256 ext3      \'
+          - '        $defaultignore{ }   \'
+          - '        method{ format }    \'
+          - '        format{ }           \'
+          - '        use_filesystem{ }   \'
+          - '        filesystem{ ext3 }  \'
+          - '        mountpoint{ /boot } \'
+          - '      .                     \'
+      ubuntu:
+        mbr:
+          - '    - {ptable: gpt, path: /dev/vda, wipe: superblock-recursive, preserve: false, name: '''','
+          - '      grub_device: true, type: disk, id: disk-vda}'
+          - '    - {device: disk-vda, size: 1048576, flag: bios_grub, number: 1, preserve: false,'
+          - '      grub_device: false, type: partition, id: partition-0}'
+          - '    - {device: disk-vda, size: 512M, wipe: superblock, flag: '''', number: 2, preserve: false,'
+          - '      grub_device: false, type: partition, id: partition-1}'
+          - '    - {fstype: ext4, volume: partition-1, preserve: false, type: format, id: format-0}'
+          - '    - {device: disk-vda, size: -1, wipe: superblock, flag: '''', number: 3,'
+          - '      preserve: false, grub_device: false, type: partition, id: partition-2}'
+          - '{% raw %}{ http_encryption_settings }{% endraw %}'
+          - '      preserve: false'
+          - '      type: lvm_volgroup'
+          - '      id: lvm_volgroup-1'
+          - '    - {name: rootlv, volgroup: lvm_volgroup-1, size: 12G, preserve: false,'
+          - '      type: lvm_partition, id: lvm_partition-0}'
+          - '    - {fstype: ext4, volume: lvm_partition-0, preserve: false, type: format, id: format-1}'
+          - '    - {device: format-1, path: /, type: mount, id: mount-1}'
+          - '    - {device: format-0, path: /boot, type: mount, id: mount-0}'
+        efi:
+          - '    - {ptable: gpt, path: /dev/vda, wipe: superblock-recursive, preserve: false, name: '''','
+          - '      grub_device: false, type: disk, id: disk-vda}'
+          - '    - {device: disk-vda, size: 512M, wipe: superblock, flag: boot, number: 1,'
+          - '      preserve: false, grub_device: true, type: partition, id: partition-0}'
+          - '    - {fstype: fat32, volume: partition-0, preserve: false, type: format, id: format-0}'
+          - '    - {device: disk-vda, size: 512M, wipe: superblock, flag: '''', number: 2, preserve: false,'
+          - '      grub_device: false, type: partition, id: partition-1}'
+          - '    - {fstype: ext4, volume: partition-1, preserve: false, type: format, id: format-1}'
+          - '    - {device: disk-vda, size: -1, wipe: superblock, flag: '''', number: 3,'
+          - '      preserve: false, grub_device: false, type: partition, id: partition-2}'
+          - '{% raw %}{ http_encryption_settings }{% endraw %}'
+          - '      preserve: false'
+          - '      type: lvm_volgroup'
+          - '      id: lvm_volgroup-0'
+          - '    - {name: rootlv, volgroup: lvm_volgroup-0, size: 12G, preserve: false,'
+          - '      type: lvm_partition, id: lvm_partition-0}'
+          - '    - {fstype: ext4, volume: lvm_partition-0, preserve: false, type: format, id: format-2}'
+          - '    - {device: format-2, path: /, type: mount, id: mount-2}'
+          - '    - {device: format-1, path: /boot, type: mount, id: mount-1}'
+          - '    - {device: format-0, path: /boot/efi, type: mount, id: mount-0}'          
+      rhel8:
+        mbr:
+          - 'part /boot --fstype="ext4" --size=1024'
+        efi:
+          - 'part /boot/efi --fstype="efi" --size=512 --fsoptions="umask=0077,shortname=winnt"'
+          - 'part /boot --fstype="ext4" --size=1024'
+      rhel7:
+        mbr:
+          - 'part /boot --fstype="ext4" --size=1024'
+        efi:
+          - 'part /boot/efi --fstype="efi" --size=512 --fsoptions="umask=0077,shortname=winnt"'
+          - 'part /boot --fstype="ext4" --size=1024'
+      rocky8:
+        mbr:
+          - 'part /boot --fstype="ext4" --size=1024'
+        efi:
+          - 'part /boot/efi --fstype="efi" --size=512 --fsoptions="umask=0077,shortname=winnt"'
+          - 'part /boot --fstype="ext4" --size=1024'
+      almalinux:
+        mbr:
+          - 'part /boot --fstype="ext4" --size=1024'
+        efi:
+          - 'part /boot/efi --fstype="efi" --size=512 --fsoptions="umask=0077,shortname=winnt"'
+          - 'part /boot --fstype="ext4" --size=1024'
+
+  tasks:
+
+  - name: GPL Info
+    debug:
+      msg: "packer-edboxes, Copyright (C) 2021 Edgar Vichor. packer-edboxes comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions."
+
+  - name: create vagrant password
+    shell: openssl rand -base64 32
+    register: openssl_password
+
+  - name: register vagrant password
+    set_fact:
+      vagrant_password: "{{ vagrant_password }}{{ item }}"
+    with_items: "{{ openssl_password.stdout_lines }}"
+    vars:
+      vagrant_password: ""
+
+  - name: debug vagrant password
+    debug:
+      msg: "{{ vagrant_password }}"
+
+  - name: check box_distribution
+    fail:
+      msg: 
+        - "Unsupported box_distribution : {{ box_distribution }}"
+        - "Supported : archlinux|fedora|debian|ubuntu|rhel8|rhel7|rocky8|almalinux"
+    when:
+      - box_distribution != "archlinux"
+      - box_distribution != "fedora"
+      - box_distribution != "debian"
+      - box_distribution != "ubuntu"
+      - box_distribution != "rhel8"
+      - box_distribution != "rhel7"
+      - box_distribution != "rocky8"
+      - box_distribution != "almalinux"
+
+  - name: check box_boottype
+    fail:
+      msg: 
+        - "Unsupported box_boottype : {{ box_boottype }}"
+        - "Supported : efi|mbr"
+    when:
+      - box_boottype != "efi"
+      - box_boottype != "mbr"
+
+  - name: check box_encrypt
+    fail:
+      msg: 
+        - "Unsupported box_encrypt : {{ box_encrypt }}"
+        - "Supported : none|luks"
+    when:
+      - box_encrypt != "none"
+      - box_encrypt != "luks"
+
+  - name: packer tmp directory -> {{ tmp_dir }}
+    file:
+      path: "{{ tmp_dir }}"
+      state: directory
+      mode: 0755
+    become: false
+
+  - name: packer http directory -> {{ http_dir }}
+    file:
+      path: "{{ http_dir }}"
+      state: directory
+      mode: 0755
+    become: false
+
+  - name: packer vm image output dir -> {{ packer_image_dir[box_distribution] }}
+    file:
+      path: "{{ packer_image_dir[box_distribution] }}"
+      state: directory
+      mode: 0755
+    become: false
+
+  - name: copy http template file {{ builder_template_file[box_distribution] }} -> {{ builder_http_dst_file }}
+    copy:
+      src: "{{ builder_template_file[box_distribution] }}"
+      dest: "{{ builder_http_dst_file }}"
+      mode: 0644
+
+  - name: create ubuntu http meta-data
+    file:
+      path: "{{ http_dir }}/meta-data"
+      state: touch
+      mode: 0666
+    become: false
+    when: box_distribution == 'ubuntu'
+
+  - name: copy packer template file {{ template_dir }}/packer/builder.json -> {{ packer_file }}
+    copy:
+      src: "{{ template_dir }}/packer/builder.json"
+      dest: "{{ packer_file }}"
+      mode: 0644
+
+  - name: box_distribution set root passwd
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ box_password }"
+      replace: "{{ box_password }}"
+
+  - name: box_distribution set vagrant password ubuntu
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ vagrant_password }"
+      replace: "{{ vagrant_password | password_hash('sha512') }}"
+    when: box_distribution == 'ubuntu'
+
+  - name: box_distribution set vagrant password
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ vagrant_password }"
+      replace: "{{ vagrant_password }}"
+
+  - name: box_distribution set vm name
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ box_name }"
+      replace: "{{ box_name }}"
+
+  - name: distributuion set partitioning
+    set_fact:
+      http_part_settings_replace: "{{ http_part_settings_replace }}{{ item }}\n"
+    with_items: "{{ http_part_settings[box_distribution][box_boottype] }}"
+    vars:
+      http_part_settings_replace: ""
+
+  - name: distributuion replace partitioning
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ http_part_settings }"
+      replace: "{{ http_part_settings_replace }}"
+
+  - name: distributuion set encryption settings
+    set_fact:
+      http_encryption_settings_replace: "{{ http_encryption_settings_replace }}{{ item }}\n"
+    with_items: "{{ http_encryption_settings[box_distribution][box_encrypt] }}"
+    vars:
+      http_encryption_settings_replace: ""
+
+  - name: distributuion replace encryption settings
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ http_encryption_settings }"
+      replace: "{{ http_encryption_settings_replace }}"
+
+  - name: distributuion set efi boot
+    set_fact:
+      http_efi_boot_replace: "{{ http_efi_boot_replace }}{{ item }}\n"
+    with_items: "{{ http_efi_boot[box_distribution][box_boottype] }}"
+    vars:
+      http_efi_boot_replace: ""
+
+  - name: distributuion replace efi boot
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ http_efi_boot }"
+      replace: "{{ http_efi_boot_replace }}"
+
+  # replace ansible_extra_arguments in a second run, otherwise we get garbage for packer
+  - name: packer ansible run
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_ansible_run }"
+      replace: |
+        {
+          "type": "ansible-local",
+          "playbook_dir": "ansible",
+          "playbook_file": "./ansible/playbook.yml",
+          "extra_arguments": [
+            "--extra-vars", 
+            "{ ansible_extra_arguments }",
+             "-vvv"
+          ],
+          "clean_staging_directory": false
+        },
+    when: box_ansible_run or box_ansible_run | bool
+
+  - name: distributuion replace locate
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ box_locale }"
+      replace: "{{ box_locale }}"
+
+  - name: distributuion replace timezone
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ box_timezone }"
+      replace: "{{ box_timezone }}"
+
+  - name: distributuion replace keymap
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ box_keymap }"
+      replace: "{{ box_keymap }}"
+
+  - name: distributuion replace xorg keyboard
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ box_xorg_keymap }"
+      replace: "{{ box_xorg_keymap }}"
+
+  - name: distributuion replace xorg keyboard model
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ box_xorg_keymap_model }"
+      replace: "{{ box_xorg_keymap_model }}"
+
+  - name: distributuion replace xorg keyboard variant
+    replace:
+      path: "{{ builder_http_dst_file }}"
+      regexp: "{ box_xorg_keymap_vatiant }"
+      replace: "{{ box_xorg_keymap_vatiant }}"
+
+  # ansible_extra_arguments replacement
+  - name: packer ansible run
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ ansible_extra_arguments }"
+      replace: '\"{ box_name: {{ box_name }}, ansible_become_password: {{ vagrant_password }}, box_password: {{ box_password }}, box_addon: {{ box_addon }}, box_desktop_user: {{ box_desktop_user }}, box_locale: {{ box_locale }}, box_timezone: {{ box_timezone }}, box_keymap: {{ box_keymap }}, box_xorg_keymap: {{ box_xorg_keymap }}, box_xorg_keymap_model: {{ box_xorg_keymap_model }}, box_xorg_keymap_vatiant: {{ box_xorg_keymap_vatiant }}, box_boottype: {{ box_boottype }} }\"'
+    when: box_ansible_run or box_ansible_run | bool
+
+  - name: packer ansible norun
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_ansible_run }"
+      replace: ""
+    when: not box_ansible_run
+
+  - name: ubuntu efi workaround
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ qemu_efi_bios }"
+      replace: |
+        , [ "-bios", "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd" ],
+        [ "-device", "virtio-blk-pci,drive=drive0,bootindex=0" ],
+        [ "-device", "virtio-blk-pci,drive=cdrom0,bootindex=1" ],
+        [ "-drive", "if=none,file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,cache=writeback,discard=ignore,format=qcow2,id=drive0" ],
+        [ "-drive", "if=none,file=packer_cache/{{ packer_iso[box_distribution]['cache_id'] }}.iso,media=cdrom,id=cdrom0" ]
+    when: box_distribution == "ubuntu" and box_boottype == 'efi'
+      
+  - name: packer set mbr bios
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ qemu_efi_bios }"
+      replace: ""
+    when: box_boottype == "mbr"
+
+  - name: packer set efi bios
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ qemu_efi_bios }"
+      replace: |
+        , [ "-bios", "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd" ]
+    when: box_boottype == "efi"
+
+  - name: packer set vagrant password
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ vagrant_password }"
+      replace: "{{ vagrant_password }}"
+
+#  - name: packer set root password
+#    replace:
+#      path: "{{ packer_file }}"
+#      regexp: "{ box_password }"
+#      replace: "{{ box_password }}"
+#
+  - name: packer set disek size
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ box_disk_size }"
+      replace: "{{ box_disk_size }}"
+
+#  - name: packer set box_name
+#    replace:
+#      path: "{{ packer_file }}"
+#      regexp: "{ box_name }"
+#      replace: "{{ box_name }}"
+
+  - name: packer set box_name_filename
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ box_name_filename }"
+      replace: "{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2"
+
+  - name: packer iso checksum
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_iso_checksum }"
+      replace: "{{ packer_iso[box_distribution]['checksum'] }}"
+
+  - name: packer set iso urls
+    set_fact:
+      packer_replace_iso_urls: "{{ packer_replace_iso_urls }}{{ item }}\n"
+    with_items: "{{ packer_iso[box_distribution]['urls'] }}"
+    vars:
+      packer_replace_iso_urls: ""
+
+  - name: packer replace iso urls
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_iso_urls }"
+      replace: "{{ packer_replace_iso_urls }}"
+
+  - name: packer set vm image dir
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_image_dir }"
+      replace: "{{ packer_image_dir[box_distribution] }}"
+
+#  - name: packer set box addon
+#    replace:
+#      path: "{{ packer_file }}"
+#      regexp: "{ box_addon }"
+#      replace: "{{ box_addon }}"
+
+#  - name: packer set desktop user
+#    replace:
+#      path: "{{ packer_file }}"
+#      regexp: "{ box_desktop_user }"
+#      replace: "{{ box_desktop_user }}"
+
+  - name: packer boot command
+    set_fact:
+      boot_command_replace: "{{ boot_command_replace }} {{ item }}\n "
+    with_items: "{{ boot_command[box_distribution][box_boottype] }}"
+    vars:
+      boot_command_replace: ""
+
+  - name: packer boot command replace
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ boot_command }"
+      replace: "{{ boot_command_replace }}"
+
+  - name: packer boot_wait
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ boot_wait }"
+      replace: "{{ boot_wait[box_distribution] }}"
+
+  - name: packer http_directory
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_http_directory }"
+      replace: "{{ http_dir }}"
+
+  - name: packer packer_headless
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_headless }"
+      replace: "{{ box_packer_headless }}"
+
+  - name: packer pre ansible install
+    set_fact:
+      packer_pre_ansible_scripts_install: "{{ packer_pre_ansible_scripts_install }}{{ item }}\n"
+    with_items: "{{ packer_pre_ansible_scripts[box_distribution] }}"
+    vars:
+      packer_pre_ansible_scripts_install: ""
+
+  - name: packer pre ansible install replace
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_pre_ansible_scripts }"
+      replace: "{{ packer_pre_ansible_scripts_install }}"
+    when: box_ansible_run or box_ansible_run | bool
+
+  - name: packer pre ansible install replace
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_pre_ansible_scripts }"
+      replace: "\"script/dummy.sh\""
+    when: not box_ansible_run
+
+  - name: packer ansible install
+    set_fact:
+      packer_ansible_install_replace: "{{ packer_ansible_install_replace }}{{ item }}\n"
+    with_items: "{{ packer_ansible_install[box_distribution] }}"
+    vars:
+      packer_ansible_install_replace: ""
+
+  - name: packer ansible install replace
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_ansible_install }"
+      replace: "{{ packer_ansible_install_replace }}"
+    when: box_ansible_run or box_ansible_run | bool
+
+  - name: packer ansible install replace
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_ansible_install }"
+      replace: "\"\""
+    when: not box_ansible_run
+
+  - name: packer post ansible scripts
+    set_fact:
+      packer_post_ansible_scripts_install: "{{ packer_post_ansible_scripts_install }}{{ item }}\n"
+    with_items: "{{ packer_post_ansible_scripts[box_distribution] }}"
+    vars:
+      packer_post_ansible_scripts_install: ""
+
+  - name: packer post ansible scripts replace
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_post_ansible_scripts }"
+      replace: "{{ packer_post_ansible_scripts_install }}"
+    when: box_ansible_run or box_ansible_run | bool
+
+  - name: packer post ansible scripts replace
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_post_ansible_scripts }"
+      replace: "\"source/script/dummy.sh\""
+    when: not box_ansible_run
+
+  - name: print box settings
+    debug:
+      msg: 
+        - "Distribution             : {{ box_distribution }}"
+        - "Boottype                 : {{ box_boottype }}"
+        - "Encrypt                  : {{ box_encrypt }}"
+        - "Destop user              : {{ box_desktop_user }}"
+        - "Box addon                : {{ box_addon }}"
+        - "Ansible run              : {{ box_ansible_run }}"
+        - "Box disk size            : {{ box_disk_size }}"
+        - "Box locale               : {{ box_locale }}"
+        - "Box timezone             : {{ box_timezone }}"
+        - "Box keymap               : {{ box_keymap }}"
+        - "Box xorg keymap          : {{ box_xorg_keymap }}"
+        - "Box xorg keymap model    : {{ box_xorg_keymap_model }}"
+        - "Box xorg keymap variant  : {{ box_xorg_keymap_vatiant }}"
+
+  - name: print build command
+    debug:
+      msg: "PACKER_CACHE_DIR={{ packer_cache }} TMPDIR={{ tmp_dir }} PACKER_LOG=1 packer build -force -on-error=abort {{ packer_file }}"
+
+  - name: running packer
+    ansible.builtin.shell: |
+      cd {{ working_dir }}
+      PACKER_CACHE_DIR={{ packer_cache }} TMPDIR={{ tmp_dir }} PACKER_LOG=1 packer build -force -on-error=abort {{ packer_file }}
+    when: box_packer_run or box_packer_run | bool

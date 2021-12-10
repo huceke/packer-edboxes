@@ -1,0 +1,64 @@
+#cloud-config
+autoinstall:
+  version: 1
+  early-commands:
+    - systemctl stop ssh
+    - iptables -A INPUT -p tcp --dport 22 -j DROP
+    - echo -n { box_password } > /tmp/luks-key
+  locale: { box_locale }
+  keyboard: 
+    layout: { box_xorg_keymap }
+    toggle: null
+    variant: { box_xorg_keymap_vatiant }
+  apt:
+    preserve_sources_list: false
+    primary:
+      - arches: [i386, amd64]
+        uri: "http://archive.ubuntu.com/ubuntu"
+      - arches: [default]
+        uri: "http://ports.ubuntu.com/ubuntu-ports"
+    geoip: true
+  storage:
+    swap:
+      size: 0
+    config:
+{ http_part_settings }
+  network:
+    version: 2
+    ethernets:
+      ens0:
+        dhcp4: true
+      ens1:
+        dhcp4: true
+      ens2:
+        dhcp4: true
+      ens3:
+        dhcp4: true
+      ens4:
+        dhcp4: true
+      ens5:
+        dhcp4: true
+      ens6:
+        dhcp4: true
+  identity:
+    hostname: { box_name }
+    username: vagrant
+    password: { vagrant_password }
+#    password: $6$rounds=4096$8dkK1P/oE$2DGKKt0wLlTVJ7USY.0jN9du8FetmEr51yjPyeiR.zKE3DGFcitNL/nF1l62BLJNR87lQZixObuXYny.Mf17K1
+  refresh-installer:
+    update: false
+  packages:
+    - qemu-guest-agent
+    - openssh-server
+  debconf-selections: |
+    d-i base-installer/install-recommends boolean false
+    d-i passwd/root-login boolean true
+  ssh:
+    install-server: false
+    authorized-keys: []
+    allow-pw: true
+  user-data:
+    disable_root: false
+    timezone: { box_timezone }
+  late-commands:
+    - echo 'vagrant ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/vagrant

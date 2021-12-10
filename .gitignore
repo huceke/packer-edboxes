@@ -1,0 +1,7 @@
+build
+vagrant
+.vagrant
+iso
+tmp
+Vagrantfile
+pass.py
