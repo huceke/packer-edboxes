@@ -27,6 +27,7 @@
 
   vars:
 
+    efi_bios: "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd"
     working_dir: "{{ lookup('env', 'PWD') }}"
     template_dir: "{{ working_dir }}/source/templates"
     http_dir: "{{ working_dir }}/build/http"
@@ -690,7 +691,7 @@
       path: "{{ packer_file }}"
       regexp: "{ qemu_efi_bios }"
       replace: |
-        , [ "-bios", "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd" ],
+        , [ "-bios", "{{ efi_bios }}" ],
         [ "-device", "virtio-blk-pci,drive=drive0,bootindex=0" ],
         [ "-device", "virtio-blk-pci,drive=cdrom0,bootindex=1" ],
         [ "-drive", "if=none,file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,cache=writeback,discard=ignore,format=qcow2,id=drive0" ],
@@ -709,7 +710,7 @@
       path: "{{ packer_file }}"
       regexp: "{ qemu_efi_bios }"
       replace: |
-        , [ "-bios", "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd" ]
+        , [ "-bios", "{{ efi_bios }}" ]
     when: box_boottype == "efi"
 
   - name: packer set vagrant password
