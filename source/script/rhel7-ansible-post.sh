@@ -1,5 +1,8 @@
 #!/bin/sh
 
+rpm -e epel-release > /dev/null
+rpm -e puppet6-release > /dev/null
+
 subscription-manager clean
 yum clean all
 
@@ -10,3 +13,5 @@ umount /media/rhel7
 rm -rf /media/rhel7
 
 rm -f /etc/yum.repos.d/rhel7.repo
+
+exit 0
