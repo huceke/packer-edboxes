@@ -105,6 +105,7 @@
       - mate-backgrounds
       - mate-utils-common
       - mate-utils
+      - mate-media
       - ssh-askpass
       - exfat-utils
       - qemu-guest-agent
