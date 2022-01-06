@@ -122,7 +122,7 @@
     boot_command:
       archlinux:
         mbr:
-          - '"<enter><wait10><wait10><wait10><wait10><wait10><wait10>",'
+          - '"<enter><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10>",'
           - '"/usr/bin/curl -O http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait5>",'
           - '"/usr/bin/bash ./{{ builder_http_file[box_distribution] }}<enter>"'
         efi:
