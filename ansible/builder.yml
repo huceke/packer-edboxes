@@ -75,16 +75,16 @@
           - '"iso/archlinux-2022.01.01-x86_64.iso",'
           - '"http://mirror.easyname.at/archlinux/iso/2022.01.01/archlinux-2022.01.01-x86_64.iso"'
       debian:
-        checksum: "sha256:8488abc1361590ee7a3c9b00ec059b29dfb1da40f8ba4adf293c7a30fa943eb2"
+        checksum: "sha256:45c9feabba213bdc6d72e7469de71ea5aeff73faea6bfb109ab5bad37c3b43bd"
         urls: 
-          - '"iso/debian-11.1.0-amd64-netinst.iso",'
-          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.1.0-amd64-netinst.iso"'
+          - '"iso/debian-11.2.0-amd64-netinst.iso",'
+          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.2.0-amd64-netinst.iso"'
       ubuntu:
-        cache_id: "b517145adf12daef464c16d34da03464aa585881"
-        checksum: "sha256:d1f2bf834bbe9bb43faf16f9be992a6f3935e65be0edece1dee2aa6eb1767423"
+        cache_id: "62850188884fff34d447798ebc9d9b22bf1f3f1f"
+        checksum: "sha256:f8e3086f3cea0fb3fefb29937ab5ed9d19e767079633960ccb50e76153effc98"
         urls: 
           - '"iso/ubuntu-20.04.2-live-server-amd64.iso",'
-          - '"https://releases.ubuntu.com/20.04/ubuntu-20.04.2-live-server-amd64.iso"'
+          - '"https://releases.ubuntu.com/20.04/ubuntu-20.04.3-live-server-amd64.iso"'
       fedora:
         checksum: "sha256:dd35f955dd5a7054213a0098c6ee737ff116aa3090fc6dbfe89d424b5c3552dd"
         urls: 
@@ -406,7 +406,7 @@
           - '      preserve: false'
           - '      type: lvm_volgroup'
           - '      id: lvm_volgroup-1'
-          - '    - {name: rootlv, volgroup: lvm_volgroup-1, size: 12G, preserve: false,'
+          - '    - {name: lv_root, volgroup: lvm_volgroup-1, size: 12G, preserve: false,'
           - '      type: lvm_partition, id: lvm_partition-0}'
           - '    - {fstype: ext4, volume: lvm_partition-0, preserve: false, type: format, id: format-1}'
           - '    - {device: format-1, path: /, type: mount, id: mount-1}'
@@ -426,7 +426,7 @@
           - '      preserve: false'
           - '      type: lvm_volgroup'
           - '      id: lvm_volgroup-0'
-          - '    - {name: rootlv, volgroup: lvm_volgroup-0, size: 12G, preserve: false,'
+          - '    - {name: lv_root, volgroup: lvm_volgroup-0, size: 12G, preserve: false,'
           - '      type: lvm_partition, id: lvm_partition-0}'
           - '    - {fstype: ext4, volume: lvm_partition-0, preserve: false, type: format, id: format-2}'
           - '    - {device: format-2, path: /, type: mount, id: mount-2}'
