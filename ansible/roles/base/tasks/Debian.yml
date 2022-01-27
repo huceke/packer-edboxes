@@ -67,6 +67,9 @@
       - python3-psutil
       - acl
       - sshpass
+      - cloud-init
+      - cloud-guest-utils
+      - cloud-initramfs-dyn-netconf
 
 - name: cleanup apt cache
   command: apt-get clean
