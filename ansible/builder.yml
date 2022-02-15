@@ -68,6 +68,16 @@
       rocky8:     "{{ working_dir }}/build/images/rocky8"
       almalinux:  "{{ working_dir }}/build/images/almalinux"
 
+    packer_qemu_binary:
+      archlinux:  ""
+      debian:     ""
+      ubuntu:     ""
+      fedora:     ""
+      rhel8:      ""
+      rhel7:      ""
+      rocky8:     ""
+      almalinux:  ""
+
     packer_iso:
       archlinux:
         checksum: "md5:e398888915881990ac2491efe014c3ac"
@@ -742,6 +752,12 @@
       path: "{{ packer_file }}"
       regexp: "{ box_name_filename }"
       replace: "{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2"
+
+  - name: packer qemu binary
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ packer_qemu_binary }"
+      replace: "{{ packer_qemu_binary[box_distribution] }}"
 
   - name: packer iso checksum
     replace:
