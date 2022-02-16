@@ -97,15 +97,7 @@ The following configuration parameters are understood:
 |box_xorg_keymap|de|Box xorg keymap|
 |box_xorg_keymap_model|pc105|Box xorg keyboard model|
 |box_xorg_keymap_vatiant|nodeadkeys|Box xorg keyboard variant|
-
-### Extra workaround for netsed virtualization on RedHat
-
-This workaround is needed for RedHat because kvm funktionality is not in the qemu-system-x86_64 binary. If you run into this set the following in the config file for your box.
-
-```
-packer_qemu_binary:
-  debian: "\"qemu_binary\": \"/usr/libexec/qemu-kvm\","
-```
+|box_qemu_binary||Qemu Binary to use. Mostly relevant for RedHat|
 
 ### Running the box
 
