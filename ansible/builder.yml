@@ -80,11 +80,11 @@
           - '"iso/debian-11.2.0-amd64-netinst.iso",'
           - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.2.0-amd64-netinst.iso"'
       ubuntu:
-        cache_id: "62850188884fff34d447798ebc9d9b22bf1f3f1f"
-        checksum: "sha256:f8e3086f3cea0fb3fefb29937ab5ed9d19e767079633960ccb50e76153effc98"
+        cache_id: "47de2d7266acde194681de2a24f5d76b43b452ca"
+        checksum: "sha256:28ccdb56450e643bad03bb7bcf7507ce3d8d90e8bf09e38f6bd9ac298a98eaad"
         urls: 
-          - '"iso/ubuntu-20.04.2-live-server-amd64.iso",'
-          - '"https://releases.ubuntu.com/20.04/ubuntu-20.04.3-live-server-amd64.iso"'
+          - '"iso/ubuntu-20.04.4-live-server-amd64.iso",'
+          - '"https://releases.ubuntu.com/20.04/ubuntu-20.04.4-live-server-amd64.iso"'
       fedora:
         checksum: "sha256:dd35f955dd5a7054213a0098c6ee737ff116aa3090fc6dbfe89d424b5c3552dd"
         urls: 
@@ -695,7 +695,7 @@
         [ "-device", "virtio-blk-pci,drive=drive0,bootindex=0" ],
         [ "-device", "virtio-blk-pci,drive=cdrom0,bootindex=1" ],
         [ "-drive", "if=none,file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,cache=writeback,discard=ignore,format=qcow2,id=drive0" ],
-        [ "-drive", "if=none,file=packer_cache/{{ packer_iso[box_distribution]['cache_id'] }}.iso,media=cdrom,id=cdrom0" ]
+        [ "-drive", "if=none,file=build/tmp/packer_cache/{{ packer_iso[box_distribution]['cache_id'] }}.iso,media=cdrom,id=cdrom0" ]
     when: box_distribution == "ubuntu" and box_boottype == 'efi'
       
   - name: packer set mbr bios
