@@ -681,7 +681,7 @@
     replace:
       path: "{{ packer_file }}"
       regexp: "{ ansible_extra_arguments }"
-      replace: '\"{ box_name: {{ box_name }}, ansible_become_password: {{ vagrant_password }}, box_password: {{ box_password }}, box_addon_converted: {{ box_addon }}, box_desktop_user: {{ box_desktop_user }}, box_locale: {{ box_locale }}, box_timezone: {{ box_timezone }}, box_keymap: {{ box_keymap }}, box_xorg_keymap: {{ box_xorg_keymap }}, box_xorg_keymap_model: {{ box_xorg_keymap_model }}, box_xorg_keymap_vatiant: {{ box_xorg_keymap_vatiant }}, box_boottype: {{ box_boottype }} }\"'
+      replace: '\"{ box_name: {{ box_name }}, ansible_become_password: {{ vagrant_password }}, box_password: {{ box_password }}, box_addon: {{ box_addon_converted }}, box_desktop_user: {{ box_desktop_user }}, box_locale: {{ box_locale }}, box_timezone: {{ box_timezone }}, box_keymap: {{ box_keymap }}, box_xorg_keymap: {{ box_xorg_keymap }}, box_xorg_keymap_model: {{ box_xorg_keymap_model }}, box_xorg_keymap_vatiant: {{ box_xorg_keymap_vatiant }}, box_boottype: {{ box_boottype }} }\"'
     when: box_ansible_run or box_ansible_run | bool
 
   - name: packer ansible norun
