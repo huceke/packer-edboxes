@@ -1,0 +1,134 @@
+[org.gnome.desktop.interface:MATE]
+cursor-theme='mate'
+document-font-name='Cantarell 11'
+font-name='Cantarell 11'
+gtk-theme='Menta'
+icon-theme='menta'
+monospace-font-name='Monospace 13'
+
+[org.gnome.desktop.wm.preferences:MATE]
+theme='Menta'
+titlebar-font='Cantarell Bold 11'
+
+[org.mate.background]
+picture-filename='/usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png'
+
+[org.mate.caja.desktop]
+font='Cantarell 11'
+
+[org.mate.dictionary]
+print-font='Cantarell 12'
+
+[org.mate.interface]
+icon-theme='menta'
+gtk-theme='Menta'
+font-name='Cantarell 11'
+document-font-name='Cantarell 11'
+monospace-font-name='Monospace 13'
+
+[org.mate.Marco.general]
+theme='Menta'
+titlebar-font='Cantarell Bold 11'
+
+[org.mate.Marco.global-keybindings]
+switch-panels='<Control><Alt>Tab'
+
+[org.mate.pluma]
+color-scheme='classic'
+editor-font='Monospace 13'
+print-font-body-pango='Monospace 9'
+print-font-header-pango='Cantarell 11'
+print-font-numbers-pango='Cantarell 8'
+
+[org.mate.stickynotes]
+default-font='Cantarell 10
+
+[org.mate.panel.menubar]
+icon-name=''
+
+[org.mate.panel]
+default-layout='default'
+
+[org.mate.terminal.profile]
+font='Monospace 12'
+use-system-font=false
+use-theme-colors=false
+foreground-color='#AAAAAAAAAAAA'
+background-color='#000000000000'
+bold-color='#000000000000'
+palette='#2E2E34343636:#CCCC00000000:#4E4E9A9A0606:#C4C4A0A00000:#34346565A4A4:#757550507B7B:#060698209A9A:#D3D3D7D7CFCF:#555557575353:#EFEF29292929:#8A8AE2E23434:#FCFCE9E94F4F:#72729F9FCFCF:#ADAD7F7FA8A8:#3434E2E2E2E2:#EEEEEEEEECEC'
+title-mode='ignore'
+title='Mate Terminal'
+silent-bell=true
+
+[org.mate.interface]
+gtk-theme='Numix'
+icon-theme='Numix'
+
+[org.mate.mate-menu]
+applet-icon=''
+
+[org.mate.peripherals-mouse]
+cursor-theme='mate'
+
+[org.mate.caja.preferences]
+enable-delete=true
+
+[org.mate.screensaver]
+picture-filename='/usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png'
+
+[org.mate.session]
+required-components-list=['windowmanager', 'panel', 'filemanager']
+
+[org.mate.drivemount]
+drivemount-checkmark-color='#6699CC'
+
+[org.mate.panel.applet.window-list-previews]
+show-window-thumbnails=false
+
+[org.gnome.software]
+compatible-projects=['GNOME', 'KDE', 'XFCE', 'MATE']
+
+
+[org.mate.screensaver]
+picture-filename='/usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png'
+
+[org.mate.session]
+required-components-list=['windowmanager', 'panel', 'filemanager']
+
+[org.mate.drivemount]
+drivemount-checkmark-color='#6699CC'
+
+[org.mate.panel.applet.window-list-previews]
+show-window-thumbnails=false
+
+[org.gnome.software]
+compatible-projects=['GNOME', 'KDE', 'XFCE', 'MATE']
+
+[org.cinnamon.desktop.background]
+picture-uri='file:///usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png'
+
+[org.cinnamon.desktop.interface]
+gtk-theme='Numix'
+icon-theme='Numix'
+keyboard-layout-show-flags=true
+
+[org.cinnamon.desktop.wm.preferences]
+theme='Numix'
+
+[org.cinnamon.settings-daemon.peripherals.touchpad]
+vertical-two-finger-scrolling=true
+horizontal-two-finger-scrolling=true
+tap-to-click=true
+touchpad-enabled=true
+
+[org.cinnamon.theme]
+name='Numix'
+
+[org.cinnamon]
+enabled-applets=['panel1:left:1:menu@cinnamon.org:0', 'panel1:left:2:panel-launchers@cinnamon.org:1', 'panel1:left:3:window-list@cinnamon.org:2', 'panel1:right:0:removable-drives@cinnamon.org:3', 'panel1:right:1:keyboard@cinnamon.org:4', 'panel1:right:2:bluetooth@cinnamon.org:5', 'panel1:right:4:systray@cinnamon.org:7', 'panel1:right:5:power@cinnamon.org:8', 'panel1:right:6:network@cinnamon.org:6', 'panel1:right:7:sound@cinnamon.org:9', 'panel1:right:8:calendar@cinnamon.org:10', 'panel1:right:9:settings@cinnamon.org:11']
+favorite-apps=['nemo.desktop', 'chromium.desktop', 'mate-terminal.desktop']
+keyboard-applet-use-flags=false
+panels-enabled=['1:0:bottom']
+next-applet-id=12
+

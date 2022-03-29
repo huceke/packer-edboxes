@@ -1,0 +1,220 @@
+# packer edboxes : extensible box ( vm ) creation tool.
+#
+# Copyright (C) 2021  Edgar Vichor ebsi4711 at gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+- name: install base for apt-key
+  package:
+    name:
+      - gpg
+      - gpg-agent
+      - ca-certificates
+    state: present
+
+- name: add google apt key
+  apt_key:
+    url: https://dl-ssl.google.com/linux/linux_signing_key.pub
+    state: present
+
+- name: enable repo non free
+  apt_repository:
+    repo: deb http://deb.debian.org/debian stable main contrib non-free
+    state: present
+    update_cache: yes
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: enable repo google chrome
+  apt_repository:
+    repo: deb http://dl.google.com/linux/chrome/deb/ stable main
+    state: present
+    filename: google-chrome
+    update_cache: yes
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: apt-get update
+  shell: apt-get update
+  register: result
+  until: result.failed == false
+  retries: 3
+
+- name: install base packages
+  package:
+    name:
+      - vim
+      - firmware-linux
+      - firmware-misc-nonfree
+      - console-data
+      - software-properties-common
+      - ntfs-3g
+      - ufw
+    state: present
+
+- name: desktop packages
+  package:
+    name:
+      - xorg
+      - xdg-user-dirs
+      - xdg-user-dirs-gtk
+      - xdg-utils
+      - xfonts-100dpi
+      - xfonts-75dpi
+      - xserver-xorg-video-qxl
+      - cinnamon
+      - gnome-icon-theme
+      - numix-icon-theme
+      - adapta-gtk-theme
+      - mate-terminal
+      - mate-backgrounds
+      - ssh-askpass
+      - exfat-utils
+      - qemu-guest-agent
+      - spice-vdagent
+      - sudo
+      - remmina
+      - remmina-plugin-rdp
+      - mate-power-manager
+      - network-manager
+      - mate-applets
+      - network-manager-gnome
+      - evince
+      - telnetd
+      - pciutils
+      - firmware-intelwimax
+      - firmware-iwlwifi
+      - firmware-brcm80211
+      - firmware-ralink
+      - firmware-zd1211
+      - atmel-firmware
+      - firmware-atheros
+      - lightdm
+      - slick-greeter
+      - google-chrome-stable
+      - firefox-esr
+      - firefox-esr-l10n-de
+      - libnss3-tools
+      - password-gorilla
+      - nmap
+      - wireshark
+      - wireshark-gtk
+      - iptraf-ng
+      - ipset
+      - gufw
+      - openssh-client
+      - openssh-server
+      - terminator
+      - vim-gtk3
+      - gedit
+      - rsync
+      - locate
+      - dconf-cli
+      - python3-psutil
+      - acl
+      - icedtea-netx
+      - fonts-dejavu
+      - fonts-cantarell
+      - flatpak
+      - libreoffice 
+      - libreoffice-l10n-de 
+      - libreoffice-gtk3
+      - libreoffice-help-common
+      - hunspell-de-de-frami
+      - wngerman
+      - hunspell-de-at-frami
+      - mythes-de-ch
+      - libgtk2.0-0
+
+#- name: install firefox from unstable
+#  command: apt-get install -y -t unstable firefox firefox-l10n-de
+#  become: yes
+
+#- name: add mozilla flatpak repo
+#  flatpak_remote:
+#    name: mozilla
+#    flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
+#    state: present
+
+#- name: Install the firefox flatpack
+#  flatpak:
+#    name: org.mozilla.firefox
+#    state: present
+
+- name: force cinnamon 2d xorg
+  copy:
+    dest: "/etc/X11/Xsession.d/99_cinnamon_2d"
+    content: |
+      CINNAMON_2D="true"
+      export CINNAMON_2D
+
+- name: loginmanager theme
+  command: sed -e 's/#greeter-session=.*/greeter-session=slick-greeter/g' -i /etc/lightdm/lightdm.conf
+
+- name: loginmanager hide userlist
+  command: sed -e 's/#greeter-hide-users=.*/greeter-hide-users=true/g' -i /etc/lightdm/lightdm.conf
+
+- name: lightdm background
+  copy:
+    dest: "/etc/lightdm/slick-greeter.conf"
+    content: |
+      [Greeter]
+      background=/usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png
+    mode: 0644
+  become: yes
+
+- name: enable login manger
+  systemd:
+    name: lightdm
+    enabled: yes
+
+- name: enable ufw
+  systemd:
+    name: ufw
+    enabled: yes
+
+- name: install plymouth
+  package:
+    name:
+      - plymouth
+      - plymouth-themes
+    state: present
+
+- name: grub default settings
+  copy:
+    dest: /etc/default/grub
+    content: |
+      GRUB_DEFAULT=0
+      GRUB_TIMEOUT=0
+      GRUB_HIDDEN_TIMEOUT=3
+      GRUB_HIDDEN_TIMEOUT_QUIET=true
+      GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
+      GRUB_CMDLINE_LINUX_DEFAULT="quiet splash nvidia-drm.modeset=1"
+      GRUB_CMDLINE_LINUX="debian-installer=en_US.UTF-8"
+
+      GRUB_FORCE_HIDDEN_MENU="true"
+      export GRUB_FORCE_HIDDEN_MENU
+    mode: 0644
+  become: yes
+
+- name: update grub
+  command: update-grub2
+  become: yes
+
+- name: cleanup apt cache
+  command: apt-get clean
+  become: yes
