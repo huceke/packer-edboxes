@@ -75,10 +75,10 @@
           - '"iso/archlinux-2022.01.01-x86_64.iso",'
           - '"http://mirror.easyname.at/archlinux/iso/2022.01.01/archlinux-2022.01.01-x86_64.iso"'
       debian:
-        checksum: "sha256:45c9feabba213bdc6d72e7469de71ea5aeff73faea6bfb109ab5bad37c3b43bd"
+        checksum: "sha256:7892981e1da216e79fb3a1536ce5ebab157afdd20048fe458f2ae34fbc26c19b"
         urls: 
-          - '"iso/debian-11.2.0-amd64-netinst.iso",'
-          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.2.0-amd64-netinst.iso"'
+          - '"iso/debian-11.3.0-amd64-netinst.iso",'
+          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.3.0-amd64-netinst.iso"'
       ubuntu:
         cache_id: "47de2d7266acde194681de2a24f5d76b43b452ca"
         checksum: "sha256:28ccdb56450e643bad03bb7bcf7507ce3d8d90e8bf09e38f6bd9ac298a98eaad"
