@@ -41,7 +41,7 @@ print-font-header-pango='Cantarell 11'
 print-font-numbers-pango='Cantarell 8'
 
 [org.mate.stickynotes]
-default-font='Cantarell 10
+default-font='Cantarell 10'
 
 [org.mate.panel.menubar]
 icon-name=''
