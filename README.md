@@ -12,7 +12,7 @@ Basically packer-edboxes should run on any current Linux distro. The following t
 - openssl
 - packer
 - ansible
-- qemu
+- qemu-desktop
 - virt-viewer
 - spice-gtk
 - spice
