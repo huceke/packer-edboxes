@@ -73,6 +73,7 @@
       - nfsidmap
       - ethtool
       - sshpass
+      - inetutils
 
 - name: sudo setting
   command: sed "s/# %wheel/%wheel/" -i /etc/sudoers
