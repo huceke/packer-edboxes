@@ -70,10 +70,10 @@
 
     packer_iso:
       archlinux:
-        checksum: "md5:e398888915881990ac2491efe014c3ac"
+        checksum: "sha256:d0605dc6a648be9bcb431a86f14f50fb87696cfc0e8b27ec4fd16d3de4029a1a"
         urls: 
-          - '"iso/archlinux-2022.01.01-x86_64.iso",'
-          - '"http://mirror.easyname.at/archlinux/iso/2022.01.01/archlinux-2022.01.01-x86_64.iso"'
+          - '"iso/archlinux-2022.05.01-x86_64.iso",'
+          - '"http://mirror.easyname.at/archlinux/iso/2022.05.01/archlinux-2022.05.01-x86_64.iso"'
       debian:
         checksum: "sha256:7892981e1da216e79fb3a1536ce5ebab157afdd20048fe458f2ae34fbc26c19b"
         urls: 
