@@ -32,6 +32,7 @@
       - cloud-utils-growpart
       - tar
       - puppet-agent
+      - tuned
     state: present
 
 - name: remove unneeded
@@ -75,7 +76,7 @@
     name: kdump
     enabled: no
 
-- name: chrome without proxy desktop entry
+- name: networking
   copy:
     dest: "/etc/sysconfig/network"
     content: |
@@ -84,7 +85,7 @@
     mode: 0644
   become: yes
 
-- name: chrome without proxy desktop entry
+- name: virtual guest tuned
   copy:
     dest: "/etc/tuned/active_profile"
     content: |
@@ -92,7 +93,7 @@
     mode: 0644
   become: yes
 
-- name: redoce vts
+- name: reduce vts
   command: sed -e "s/^#NAutoVTs=.*/NAutoVTs=0/g" -i /etc/systemd/logind.conf
 
 - name: cleanup dnf cacche

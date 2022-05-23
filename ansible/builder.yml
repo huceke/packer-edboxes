@@ -41,6 +41,7 @@
       debian:     "debian10-preseed.cfg-{{ box_boottype }}-{{ box_encrypt }}"
       ubuntu:     "user-data"
       fedora:     "fedora35-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
+      rhel9:      "rhel9-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
       rhel8:      "rhel8-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
       rhel7:      "rhel7-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
       rocky8:     "rocky8-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
@@ -53,6 +54,7 @@
       debian:     "{{ template_dir }}/http/debian10-preseed.cfg"
       ubuntu:     "{{ template_dir }}/http/user-data-ubuntu-2004"
       fedora:     "{{ template_dir }}/http/fedora35-kvm-ks.cfg"
+      rhel9:      "{{ template_dir }}/http/rhel9-kvm-ks.cfg"
       rhel8:      "{{ template_dir }}/http/rhel8-kvm-ks.cfg"
       rhel7:      "{{ template_dir }}/http/rhel7-kvm-ks.cfg"
       rocky8:     "{{ template_dir }}/http/rocky8-kvm-ks.cfg"
@@ -63,6 +65,7 @@
       debian:     "{{ working_dir }}/build/images/debian"
       ubuntu:     "{{ working_dir }}/build/images/ubuntu"
       fedora:     "{{ working_dir }}/build/images/fedora"
+      rhel9:      "{{ working_dir }}/build/images/rhel9"
       rhel8:      "{{ working_dir }}/build/images/rhel8"
       rhel7:      "{{ working_dir }}/build/images/rhel7"
       rocky8:     "{{ working_dir }}/build/images/rocky8"
@@ -90,10 +93,14 @@
         urls: 
           - '"iso/Fedora-Server-netinst-x86_64-35-1.2.iso",'
           - '"https://mirror.karneval.cz/pub/linux/fedora/linux/releases/35/Server/x86_64/iso/Fedora-Server-netinst-x86_64-35-1.2.iso"'
+      rhel9:
+        checksum: "sha256:a387f3230acf87ee38707ee90d3c88f44d7bf579e6325492f562f0f1f9449e89"
+        urls:
+          - '"iso/rhel-baseos-9.0-x86_64-dvd.iso"'
       rhel8:
-        checksum: "sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0"
+        checksum: "sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8"
         urls: 
-          - '"iso/rhel-8.5-x86_64-dvd.iso"'
+          - '"iso/rhel-8.6-x86_64-dvd.iso"'
       rhel7:
         checksum: "sha256:19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191"
         urls: 
@@ -114,6 +121,7 @@
       debian:     "10s"
       ubuntu:     "2s"
       fedora:     "10s"
+      rhel9:      "10s"
       rhel8:      "10s"
       rhel7:      "10s"
       rocky8:     "10s"
@@ -181,6 +189,11 @@
           - '"<bs><bs><bs>",'
           - '" autoinstall \"ds=nocloud-net;s=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/\"",'
           - '" --- <wait><f10><wait>"'
+      rhel9:
+        mbr:
+          - '"<up><wait><tab><wait> text inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait>"'
+        efi:
+          - '"<up><wait>e<wait><down><down><end> inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><leftCtrlOn><x>"'
       rhel8:
         mbr:
           - '"<up><wait><tab><wait> text ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait>"'
@@ -216,6 +229,8 @@
         - '"apt-get -y install ansible",'
         - '"apt-get -y install ansible-lint",'
         - '"echo \"vagrant        ALL=(ALL)       NOPASSWD: ALL\" >> /etc/sudoers.d/vagrant"'
+      rhel9:
+        - '""'
       rhel8:
         - '""'
       rhel7:
@@ -236,6 +251,8 @@
         - '"source/script/dummy.sh"'
       ubuntu:
         - '"source/script/dummy.sh"'
+      rhel9:
+        - '"source/script/rhel9-ansible.sh"'
       rhel8:
         - '"source/script/rhel8-ansible.sh"'
       rhel7:
@@ -253,6 +270,9 @@
       debian:
         - '"source/script/cleanup.sh"'
       ubuntu:
+        - '"source/script/cleanup.sh"'
+      rhel9:
+        - '"source/script/rhel9-ansible-post.sh",'
         - '"source/script/cleanup.sh"'
       rhel8:
         - '"source/script/rhel8-ansible-post.sh",'
@@ -295,6 +315,11 @@
           - '      id: dm_crypt-0}'
           - '    - name: rootvg_vm'
           - '      devices: [dm_crypt-0]'
+      rhel9:
+        none:
+          - 'part pv.4 --grow --size=100'
+        luks:
+          - 'part pv.4 --grow --size=100 --encrypted  --luks-version=luks2 --cipher=aes-xts-plain64 --pbkdf-time=5000 --passphrase={{ box_password }}'
       rhel8:
         none:
           - 'part pv.4 --grow --size=100'
@@ -333,6 +358,11 @@
         efi:
           - 'd-i partman-efi/non_efi_system boolean true'
       ubuntu:
+        mbr:
+          - ''
+        efi:
+          - ''
+      rhel9:
         mbr:
           - ''
         efi:
@@ -432,6 +462,12 @@
           - '    - {device: format-2, path: /, type: mount, id: mount-2}'
           - '    - {device: format-1, path: /boot, type: mount, id: mount-1}'
           - '    - {device: format-0, path: /boot/efi, type: mount, id: mount-0}'          
+      rhel9:
+        mbr:
+          - 'part /boot --fstype="ext4" --size=1024'
+        efi:
+          - 'part /boot/efi --fstype="efi" --size=512 --fsoptions="umask=0077,shortname=winnt"'
+          - 'part /boot --fstype="ext4" --size=1024'
       rhel8:
         mbr:
           - 'part /boot --fstype="ext4" --size=1024'
@@ -482,12 +518,13 @@
     fail:
       msg: 
         - "Unsupported box_distribution : {{ box_distribution }}"
-        - "Supported : archlinux|fedora|debian|ubuntu|rhel8|rhel7|rocky8|almalinux"
+        - "Supported : archlinux|fedora|debian|ubuntu|rhel9|rhel8|rhel7|rocky8|almalinux"
     when:
       - box_distribution != "archlinux"
       - box_distribution != "fedora"
       - box_distribution != "debian"
       - box_distribution != "ubuntu"
+      - box_distribution != "rhel9"
       - box_distribution != "rhel8"
       - box_distribution != "rhel7"
       - box_distribution != "rocky8"
@@ -764,6 +801,12 @@
       regexp: "{ packer_qemu_binary }"
       replace: "{{ box_qemu_binary_replace }}"
 
+  - name: packer qemu cpu
+    replace:
+      path: "{{ packer_file }}"
+      regexp: "{ qemu_cpu }"
+      replace: "{{ box_qemu_cpu }}"
+
   - name: packer iso checksum
     replace:
       path: "{{ packer_file }}"
@@ -911,6 +954,7 @@
         - "Box xorg keymap          : {{ box_xorg_keymap }}"
         - "Box xorg keymap model    : {{ box_xorg_keymap_model }}"
         - "Box xorg keymap variant  : {{ box_xorg_keymap_vatiant }}"
+        - "Box QEMU cpu             : {{ box_qemu_cpu }}"
 
   - name: print build command
     debug:

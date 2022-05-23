@@ -98,6 +98,7 @@ The following configuration parameters are understood:
 |box_xorg_keymap_model|pc105|Box xorg keyboard model|
 |box_xorg_keymap_vatiant|nodeadkeys|Box xorg keyboard variant|
 |box_qemu_binary||Qemu Binary to use. Mostly relevant for RedHat|
+|box_qemu_cpu||Qemu CPU model|
 
 ### Running the box
 

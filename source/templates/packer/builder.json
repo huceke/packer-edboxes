@@ -32,6 +32,10 @@
         [
           "-smp",
           "cpus=1,maxcpus=16,cores=4"
+        ],
+        [
+          "-cpu",
+          "{ qemu_cpu }"
         ]
         { qemu_efi_bios }
       ],
