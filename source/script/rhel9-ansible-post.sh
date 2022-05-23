@@ -9,9 +9,9 @@ dnf clean all
 subscription-manager config --rhsm.manage_repos=1
 subscription-manager config --rhsm.auto_enable_yum_plugins=1
 
-umount /media/rhel8
-rm -rf /media/rhel8
+umount /media/rhel9
+rm -rf /media/rhel9
 
-rm -f /etc/yum.repos.d/rhel8.repo
+rm -f /etc/yum.repos.d/rhel9.repo
 
 exit 0
