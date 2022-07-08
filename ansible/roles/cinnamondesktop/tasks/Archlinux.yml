@@ -63,7 +63,7 @@
       - pipewire
       - pipewire-jack
       - pipewire-alsa
-      - pipewire-media-session
+      - wireplumber
       - pipewire-pulse
       - xdg-desktop-portal
       - xdg-desktop-portal-gtk
