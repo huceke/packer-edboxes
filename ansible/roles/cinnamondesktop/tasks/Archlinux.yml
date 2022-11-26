@@ -120,10 +120,6 @@
   command: trizen -S password-gorilla --noedit --noconfirm --sync
   become_user: vagrant
 
-- name: pygtk
-  command: trizen -S pygtk --noedit --noconfirm --sync
-  become_user: vagrant
-
 - name: lightdm-slick-greeter
   command: trizen -S lightdm-slick-greeter --noedit --noconfirm --sync
   become_user: vagrant
