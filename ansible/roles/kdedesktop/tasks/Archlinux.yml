@@ -92,7 +92,6 @@
       - cantarell-fonts
       - libreoffice-fresh
       - libreoffice-fresh-de
-      - python2-numpy
       - sddm
       - plasma-desktop
       - plasma-pa
