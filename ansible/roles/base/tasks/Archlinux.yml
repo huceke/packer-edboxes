@@ -46,6 +46,7 @@
     name:
       - git
       - base-devel
+      - fakeroot
 
 - git:
     repo: https://aur.archlinux.org/trizen.git
