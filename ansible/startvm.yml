@@ -63,7 +63,7 @@
 
   - name: set qemu command
     set_fact:
-      qemu_command: "{{ box_qemu_binary }} --enable-kvm {{ efi_bios_boot }} -m 4096 -drive file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,if=virtio -k de -vga {{ qemu_vga }} -device virtio-serial-pci -netdev user,id=user.0,hostfwd=tcp::2222-:22 -device virtio-net,netdev=user.0 -spice gl=on,port=5930,disable-ticketing {{ qemu_sound }} -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent -display spice-app -cpu {{ box_qemu_cpu }}"
+      qemu_command: "{{ box_qemu_binary }} --enable-kvm {{ efi_bios_boot }} -m 4096 -drive file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,if=virtio -k de -vga {{ qemu_vga }} -device virtio-serial-pci -netdev user,id=user.0,hostfwd=tcp::4222-:22 -device virtio-net,netdev=user.0 -spice gl=on,port=5930,disable-ticketing=on {{ qemu_sound }} -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent -display spice-app -cpu {{ box_qemu_cpu }}"
 
   - name: vm image
     debug:
