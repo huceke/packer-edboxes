@@ -24,8 +24,6 @@
 
 - name: install mate desktop
   shell: "dnf --allowerasing -y groupinstall mate-desktop"
-  args:
-    warn: false
 
 - name: gtk and icon theme
   package:
@@ -49,7 +47,6 @@
       - terminator
       - remmina
       - gedit
-      - icedtea-web
       - dejavu-sans-mono-fonts
       - abattis-cantarell-fonts
 #      - pangox-compat

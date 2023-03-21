@@ -21,6 +21,7 @@
     name:
       - gpg
       - sshpass
+      - acl
     state: present
 
 - name: qemu additions

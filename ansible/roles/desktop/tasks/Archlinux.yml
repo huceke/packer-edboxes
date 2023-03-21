@@ -97,8 +97,6 @@
       - dconf
       - python-psutil
       - acl
-      - jre-openjdk
-      - icedtea-web
       - netctl
       - parted
       - mdadm

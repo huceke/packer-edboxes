@@ -154,7 +154,6 @@
       - dconf-cli
       - python3-psutil
       - acl
-      - icedtea-netx
       - fonts-dejavu
       - fonts-cantarell
       - flatpak
