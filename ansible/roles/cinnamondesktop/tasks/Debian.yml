@@ -83,7 +83,7 @@
       - mate-terminal
       - mate-backgrounds
       - ssh-askpass
-      - exfat-utils
+      - exfat-fuse
       - qemu-guest-agent
       - spice-vdagent
       - sudo
@@ -96,7 +96,6 @@
       - evince
       - telnetd
       - pciutils
-      - firmware-intelwimax
       - firmware-iwlwifi
       - firmware-brcm80211
       - firmware-ralink

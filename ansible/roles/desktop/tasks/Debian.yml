@@ -107,7 +107,7 @@
       - mate-utils
       - mate-media
       - ssh-askpass
-      - exfat-utils
+      - exfat-fuse
       - qemu-guest-agent
       - spice-vdagent
       - sudo
@@ -122,7 +122,6 @@
       - mate-desktop-environment
       - mate-notification-daemon
       - pciutils
-      - firmware-intelwimax
       - firmware-iwlwifi
       - firmware-brcm80211
       - firmware-ralink

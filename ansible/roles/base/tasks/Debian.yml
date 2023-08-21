@@ -54,7 +54,6 @@
       - sudo
       - network-manager
       - pciutils
-      - firmware-intelwimax
       - firmware-iwlwifi
       - firmware-brcm80211
       - firmware-ralink

@@ -47,7 +47,7 @@
     qemu_vga: "virtio"
     #qemu_sound: "-audiodev spice,id=snd0 -soundhw hda"
     #qemu_sound: "-device ich9-intel-hda -device hda-micro,audiodev=hda -audiodev pa,id=hda,server=/run/user/1000/pulse/native"
-    qemu_sound: ""
+    qemu_sound: "-audiodev id=none,driver=none"
 
   tasks:
 

@@ -78,10 +78,10 @@
           - '"iso/archlinux-2023.03.01-x86_64.iso",'
           - '"https://mirror.easyname.at/archlinux/iso/2023.03.01/archlinux-2023.03.01-x86_64.iso"'
       debian:
-        checksum: "sha256:e482910626b30f9a7de9b0cc142c3d4a079fbfa96110083be1d0b473671ce08d"
+        checksum: "sha256:3b0e9718e3653435f20d8c2124de6d363a51a1fd7f911b9ca0c6db6b3d30d53e"
         urls: 
-          - '"iso/debian-11.6.0-amd64-netinst.iso",'
-          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.6.0-amd64-netinst.iso"'
+          - '"iso/debian-12.0.0-amd64-netinst.iso",'
+          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.0.0-amd64-netinst.iso"'
       ubuntu:
         cache_id: "47de2d7266acde194681de2a24f5d76b43b452ca"
         checksum: "sha256:28ccdb56450e643bad03bb7bcf7507ce3d8d90e8bf09e38f6bd9ac298a98eaad"
@@ -94,9 +94,9 @@
           - '"iso/Fedora-Server-netinst-x86_64-37-1.5.iso",'
           - '"https://mirror.karneval.cz/pub/linux/fedora/linux/releases/37/Server/x86_64/iso/Fedora-Server-netinst-x86_64-37-1.7.iso"'
       rhel9:
-        checksum: "sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2"
+        checksum: "sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2"
         urls:
-          - '"iso/rhel-baseos-9.1-x86_64-dvd.iso"'
+          - '"iso/rhel-9.2-x86_64-dvd.iso"'
       rhel8:
         checksum: "sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8"
         urls: 
