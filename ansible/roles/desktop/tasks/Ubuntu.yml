@@ -116,7 +116,7 @@
       - mate-utils
       - mate-media
       - ssh-askpass
-      - exfat-utils
+      - exfat-fuse
       - qemu-guest-agent
       - spice-vdagent
       - sudo

@@ -78,10 +78,10 @@
           - '"iso/archlinux-2023.03.01-x86_64.iso",'
           - '"https://mirror.easyname.at/archlinux/iso/2023.03.01/archlinux-2023.03.01-x86_64.iso"'
       debian:
-        checksum: "sha256:3b0e9718e3653435f20d8c2124de6d363a51a1fd7f911b9ca0c6db6b3d30d53e"
+        checksum: "sha256:64d727dd5785ae5fcfd3ae8ffbede5f40cca96f1580aaa2820e8b99dae989d94"
         urls: 
-          - '"iso/debian-12.0.0-amd64-netinst.iso",'
-          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.0.0-amd64-netinst.iso"'
+          - '"iso/debian-12.4.0-amd64-netinst.iso",'
+          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.4.0-amd64-netinst.iso"'
       ubuntu:
         cache_id: "47de2d7266acde194681de2a24f5d76b43b452ca"
         checksum: "sha256:28ccdb56450e643bad03bb7bcf7507ce3d8d90e8bf09e38f6bd9ac298a98eaad"
@@ -98,9 +98,9 @@
         urls:
           - '"iso/rhel-9.2-x86_64-dvd.iso"'
       rhel8:
-        checksum: "sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8"
+        checksum: "sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09"
         urls: 
-          - '"iso/rhel-8.6-x86_64-dvd.iso"'
+          - '"iso/rhel-8.8-x86_64-dvd.iso"'
       rhel7:
         checksum: "sha256:19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191"
         urls: 
