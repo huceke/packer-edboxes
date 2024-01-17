@@ -24,6 +24,12 @@ Additional for EFI builds :
 
 *Note that this list of package names applies to Archlinux. Naming might be different on your distro.*
 
+Additional for packer 1.10.0 and later
+```
+packer plugins install github.com/hashicorp/qemu
+packer plugins install github.com/hashicorp/ansible
+```
+
 ##  Usage
 
 ### Preparing the packer environment
