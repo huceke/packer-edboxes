@@ -73,10 +73,10 @@
 
     packer_iso:
       archlinux:
-        checksum: "sha256:816758ba8fd8a06dff539b9af08eb8100c8bad526ac19ef4486bce99cd3ca18c"
+        checksum: "sha256:891ebab4661cedb0ae3b8fe15a906ae2ba22e284551dc293436d5247220933c5"
         urls: 
-          - '"iso/archlinux-2023.03.01-x86_64.iso",'
-          - '"https://mirror.easyname.at/archlinux/iso/2023.03.01/archlinux-2023.03.01-x86_64.iso"'
+          - '"iso/archlinux-2024.02.01-x86_64.iso",'
+          - '"https://mirror.easyname.at/archlinux/iso/2024.02.01/archlinux-2024.02.01-x86_64.iso"'
       debian:
         checksum: "sha256:64d727dd5785ae5fcfd3ae8ffbede5f40cca96f1580aaa2820e8b99dae989d94"
         urls: 

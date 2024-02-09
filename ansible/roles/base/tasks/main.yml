@@ -35,7 +35,7 @@
   include_vars: "{{ ansible_distribution }}.yml"
 
 - name: include distribution specific install
-  include: "{{ ansible_distribution }}.yml"
+  include_tasks: "{{ ansible_distribution }}.yml"
 
 - name: add user {{ system_user }}
   user:

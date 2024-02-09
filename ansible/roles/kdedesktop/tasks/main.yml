@@ -29,11 +29,11 @@
   include_vars: "{{ ansible_distribution }}.yml"
 
 - name: include distribution specific install
-  include: "{{ ansible_distribution }}.yml"
+  include_tasks: "{{ ansible_distribution }}.yml"
 
 - name: include desktop specific vars
   include_vars: "kdedesktop.yml"
 
 - name: include desktop specific install
-  include: "kdedesktop.yml"
+  include_tasks: "kdedesktop.yml"
 
