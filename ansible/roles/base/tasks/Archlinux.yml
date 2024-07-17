@@ -47,6 +47,7 @@
       - git
       - base-devel
       - fakeroot
+      - python-passlib
 
 - git:
     repo: https://aur.archlinux.org/trizen.git
