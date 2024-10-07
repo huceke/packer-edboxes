@@ -20,9 +20,13 @@
   copy:
     dest: "/etc/pacman.d/mirrorlist"
     content: |
-      Server = http://mirror.digitalnova.at/archlinux/$repo/os/$arch
-      Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch
-      Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch
+      Server = http://mirror.alwyzon.net/archlinux/$repo/os/$arch
+      #Server = https://mirror.alwyzon.net/archlinux/$repo/os/$arch
+      #Server = http://at.mirrors.cicku.me/archlinux/$repo/os/$arch
+      #Server = https://at.mirrors.cicku.me/archlinux/$repo/os/$arch
+      #Server = http://mirror.digitalnova.at/archlinux/$repo/os/$arch
+      #Server = http://mirror.easyname.at/archlinux/$repo/os/$arch
+      #Server = https://at.arch.mirror.kescher.at/$repo/os/$arch
     mode: 0644
   become: yes
 
