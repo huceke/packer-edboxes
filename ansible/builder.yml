@@ -27,7 +27,7 @@
 
   vars:
 
-    efi_bios: "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd"
+    efi_bios: "{{ box_efi_bios }}"
     working_dir: "{{ lookup('env', 'PWD') }}"
     template_dir: "{{ working_dir }}/source/templates"
     http_dir: "{{ working_dir }}/build/http"
@@ -73,15 +73,15 @@
 
     packer_iso:
       archlinux:
-        checksum: "sha256:b72dd6ffef7507f8b7cddd7c69966841650ba0f82c29a318cb2d182eb3fcb1db"
+        checksum: "sha256:bceb3dded8935c1d3521c475a69ae557e082839b46d921c8b400524470b5c965"
         urls: 
-          - '"iso/archlinux-2024.10.01-x86_64.iso",'
-          - '"https://mirror.easyname.at/archlinux/iso/2024.10.01/archlinux-2024.10.01-x86_64.iso"'
+          - '"iso/archlinux-2024.11.01-x86_64.iso",'
+          - '"https://mirror.easyname.at/archlinux/iso/2024.11.01/archlinux-2024.11.01-x86_64.iso"'
       debian:
-        checksum: "sha256:8fde79cfc6b20a696200fc5c15219cf6d721e8feb367e9e0e33a79d1cb68fa83"
+        checksum: "sha256:04396d12b0f377958a070c38a923c227832fa3b3e18ddc013936ecf492e9fbb3"
         urls: 
-          - '"iso/debian-12.7.0-amd64-netinst.iso",'
-          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.7.0-amd64-netinst.iso"'
+          - '"iso/debian-12.8.0-amd64-netinst.iso",'
+          - '"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.8.0-amd64-netinst.iso"'
       ubuntu:
         cache_id: "47de2d7266acde194681de2a24f5d76b43b452ca"
         checksum: "sha256:28ccdb56450e643bad03bb7bcf7507ce3d8d90e8bf09e38f6bd9ac298a98eaad"
