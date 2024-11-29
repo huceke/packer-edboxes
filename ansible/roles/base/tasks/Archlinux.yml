@@ -82,6 +82,7 @@
       - ethtool
       - sshpass
       - inetutils
+      - arch-install-scripts
 
 - name: sudo setting
   command: sed "s/# %wheel/%wheel/" -i /etc/sudoers
