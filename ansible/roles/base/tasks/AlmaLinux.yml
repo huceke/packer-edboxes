@@ -17,7 +17,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 - name: puppet repo
-  command: dnf install -y https://yum.puppetlabs.com/puppet6-release-el-8.noarch.rpm
+  command: dnf install -y https://yum.puppetlabs.com/puppet6-release-el-9.noarch.rpm
   become: yes
 
 - name: install base packages
@@ -46,9 +46,24 @@
     name: qemu-guest-agent
     enabled: yes
 
+- name: enable cloud init local
+  systemd:
+    name: cloud-init-local
+    enabled: yes
+
 - name: enable cloud init
   systemd:
     name: cloud-init
+    enabled: yes
+
+- name: enable cloud config
+  systemd:
+    name: cloud-config
+    enabled: yes
+
+- name: enable cloud final
+  systemd:
+    name: cloud-final
     enabled: yes
 
 - name: enable sshd

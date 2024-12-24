@@ -22,6 +22,8 @@
       - gpg
       - sshpass
       - acl
+      - python3-crypto
+      - python3-passlib
     state: present
 
 - name: qemu additions

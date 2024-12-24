@@ -22,8 +22,23 @@
       - gpg
     state: present
 
+- name: xorg
+  dnf:
+    name: '@base-x'
+    state: present
+
 - name: install mate desktop
-  shell: "dnf --allowerasing -y groupinstall mate-desktop"
+  dnf:
+    name:
+      - '@mate-desktop'
+      - mate-terminal
+    state: present
+
+- name: additional packages
+  package:
+    name:
+      - lightdm
+    state: present
 
 - name: gtk and icon theme
   package:
@@ -46,6 +61,7 @@
       - chromium
       - terminator
       - remmina
+      - remmina-plugins-rdp
       - gedit
       - dejavu-sans-mono-fonts
       - abattis-cantarell-fonts
@@ -80,6 +96,14 @@
   systemd:
     name: qemu-guest-agent
     enabled: yes
+
+- name: copy logind.conf
+  copy:
+    src: "/usr/lib/systemd/logind.conf"
+    dest: "/etc/systemd/logind.conf"
+    mode: 0666
+    owner: root
+    group: root
 
 - name: cleanup dnf cacche
   command: dnf clean all

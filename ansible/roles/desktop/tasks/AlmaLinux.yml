@@ -16,3 +16,62 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+- name: enable crb repo
+  command: dnf config-manager --set-enabled crb
+
+- name: enable epel repo
+  package:
+    name:
+      - elrepo-release
+    state: present
+
+- name: install base packages
+  package:
+    name:
+      - gpg
+    state: present
+
+- name: install gnome desktop
+  package:
+    name:
+      - gdm
+      - gnome-desktop3
+      - gnome-terminal
+    state: present
+
+- name: qemu additions
+  package:
+    name:
+      - qemu-guest-agent
+      - spice-vdagent
+    state: present
+
+- name: additional apps
+  package:
+    name:
+      - chromium
+      - terminator
+      - remmina
+      - remmina-plugins-rdp
+      - gedit
+      - dejavu-sans-mono-fonts
+      - abattis-cantarell-fonts
+#      - pangox-compat
+    state: present
+
+- name: enable login manager
+  systemd:
+    name: gdm
+    enabled: yes
+
+- name: enable graphical target
+  shell: "systemctl set-default graphical.target"
+
+- name: enable qemu guest agent
+  systemd:
+    name: qemu-guest-agent
+    enabled: yes
+
+- name: cleanup dnf cacche
+  command: dnf clean all
+  become: yes
