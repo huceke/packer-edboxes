@@ -48,6 +48,7 @@
     #qemu_sound: "-audiodev spice,id=snd0 -soundhw hda"
     #qemu_sound: "-device ich9-intel-hda -device hda-micro,audiodev=hda -audiodev pa,id=hda,server=/run/user/1000/pulse/native"
     qemu_sound: "-audiodev id=none,driver=none"
+    box_qemu_3d_accel: "false"
 
   tasks:
 
@@ -64,6 +65,12 @@
   - name: set qemu command
     set_fact:
       qemu_command: "{{ box_qemu_binary }} --enable-kvm {{ efi_bios_boot }} -m 4096 -drive file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,if=virtio -k de -vga {{ qemu_vga }} -device virtio-serial-pci -netdev user,id=user.0,hostfwd=tcp::4222-:22 -device virtio-net,netdev=user.0 -spice gl=on,port=5930,disable-ticketing=on {{ qemu_sound }} -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent -display spice-app -cpu {{ box_qemu_cpu }}"
+    when: box_qemu_3d_accel == "false"
+
+  - name: set qemu command
+    set_fact:
+      qemu_command: "{{ box_qemu_binary }} --enable-kvm {{ efi_bios_boot }} -m 4096 -drive file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,if=virtio -k de -device virtio-serial-pci -netdev user,id=user.0,hostfwd=tcp::4222-:22 -device virtio-net,netdev=user.0 {{ qemu_sound }} -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent -cpu {{ box_qemu_cpu }} -device virtio-vga-gl -display spice-app,gl=on"
+    when: box_qemu_3d_accel == "true"
 
   - name: vm image
     debug:

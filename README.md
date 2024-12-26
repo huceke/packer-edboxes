@@ -105,7 +105,8 @@ The following configuration parameters are understood:
 |box_xorg_keymap_vatiant|nodeadkeys|Box xorg keyboard variant|
 |box_qemu_binary||Qemu Binary to use. Mostly relevant for RedHat|
 |box_qemu_cpu||Qemu CPU model|
-|box_efi_bios|"/usr/share/edk2/x64/OVMF.4m.fd2|EFI Bios to use for EFI boxes
+|box_efi_bios|"/usr/share/edk2/x64/OVMF.4m.fd2|EFI Bios to use for EFI boxes|
+|box_qemu_3d_accel|"true"\|"false"|Use qemu 3D accel|
 
 ### Running the box
 
