@@ -135,13 +135,13 @@ build
 
 ## Suported distributions
 
-- Debian 11
-- Fedora 34
+- Debian 12
+- Fedora 41
 - Archlinux 
-- RedHat 8.4
-- RedHat 7.9
-- Rocky 8.4
-- AlmaLinux 8.4
+- RedHat 8
+- RedHat 7
+- Rocky 8
+- AlmaLinux 9
 - Ubuntu 20.04
 
 For RedHat create the directory **iso** inside **packer-edboxes** and put the Binary DVD for the desired RedHat version there.
