@@ -3,33 +3,29 @@
 # and some integrations from https://raw.githubusercontent.com/geerlingguy/packer-centos-7/master/http/ks.cfg
 
 # Run the installer
-install
-
-# Use network installation
-#url --mirrorlist=http://ftp.tugraz.at/mirror/centos/8.2.2004/BaseOS/x86_64/os/
-#url --url=http://ftp.tugraz.at/mirror/centos/8.2.2004/BaseOS/x86_64/os
+#install
 
 # Use CDROM installation media
 #cdrom
 
 # System language
-lang { box_locale }
+lang {{ box_locale }}
 
 # Keyboard layouts
-keyboard { box_xorg_keymap }
+keyboard {{ box_xorg_keymap }}
 
 # Enable more hardware support
 #unsupported_hardware
 
 # Network information
-network --bootproto=dhcp --hostname={ box_name }
+network --bootproto=dhcp --hostname={{ box_name }}
 
 # System authorization information
 #auth --enablemd5 --enableshadow
 
 # Root password
 #rootpw --iscrypted $5$HbT0pi/vSPOorJ.Y$m7o938vMi1Wn00n0FH4fbZBO195iWVxSTS/jFiGF5O4
-rootpw --plaintext { box_password }
+rootpw --plaintext {{ box_password }}
 
 # Selinux dsiable
 selinux --disabled
@@ -38,7 +34,7 @@ selinux --disabled
 #services --disabled="kdump" --enabled="sshd,rsyslog,chronyd,acpid"
 
 # System timezone
-timezone { box_timezone } --isUtc
+timezone {{ box_timezone }} --utc
 #timezone UTC
 
 # System bootloader configuration
@@ -60,21 +56,15 @@ zerombr
 clearpart --none --initlabel
 
 # Disk partitioning information
-{ http_part_settings }
-{ http_encryption_settings }
+{{ http_part_settings_replace }}
+{{ http_encryption_settings_replace }}
 volgroup rootvg_vm --pesize=4096 pv.4
-logvol /      --fstype="ext4" --size=6144 --name=lv_root --vgname=rootvg_vm
-logvol /var   --fstype="ext4" --size=2048 --name=lv_var --vgname=rootvg_vm
-logvol /tmp   --fstype="ext4" --size=128 --name=lv_tmp --vgname=rootvg_vm
-logvol /home  --fstype="ext4" --size=128 --name=lv_home --vgname=rootvg_vm
-logvol /opt   --fstype="ext4" --size=512 --name=lv_opt --vgname=rootvg_vm 
+logvol /      --fstype="ext4" --size=6144 --name=lv_root --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
+logvol /var   --fstype="ext4" --size=2048 --name=lv_var --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
+logvol /tmp   --fstype="ext4" --size=128 --name=lv_tmp --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
+logvol /home  --fstype="ext4" --size=128 --name=lv_home --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
+logvol /opt   --fstype="ext4" --size=512 --name=lv_opt --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
 logvol swap   --fstype="swap" --size=256 --name=lv_swap --vgname=rootvg_vm
-#logvol /      --fstype="ext4" --size=6144 --name=lv_root --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
-#logvol /var   --fstype="ext4" --size=2048 --name=lv_var --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
-#logvol /tmp   --fstype="ext4" --size=128 --name=lv_tmp --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
-#logvol /home  --fstype="ext4" --size=128 --name=lv_home --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
-#logvol /opt   --fstype="ext4" --size=512 --name=lv_opt --vgname=rootvg_vm --mkfsoptions="-O ^metadata_csum"
-#logvol swap   --fstype="swap" --size=256 --name=lv_swap --vgname=rootvg_vm
 
 # Do not run the Setup Agent on first boot
 firstboot --disabled
@@ -83,7 +73,7 @@ firstboot --disabled
 eula --agreed
 
 # Users
-user --name=vagrant --plaintext --password={ vagrant_password } --groups=wheel
+user --name=vagrant --plaintext --password={{ box_vagrant_password }} --groups=wheel
 
 # Reboot the system when the install is complete
 reboot
@@ -101,7 +91,6 @@ grub2
 kernel
 acpid
 rsyslog
-sudo
 -firewalld
 -avahi*
 -network-scripts
@@ -149,9 +138,9 @@ sudo
 -plymouth
 %end
 
-%post --log /root/ks-post.log
+%post --erroronfail
 
-#/usr/bin/yum install -y sudo
+/usr/bin/yum install -y sudo
 
 # sudo
 echo "vagrant        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers.d/vagrant
@@ -170,6 +159,6 @@ sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers
 
 #echo "virtual-guest" > /etc/tuned/active_profile
 
-/usr/bin/yum clean all
+/usr/bin/dnf clean all
 
 %end

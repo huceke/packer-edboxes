@@ -29,6 +29,8 @@
     working_dir: "{{ lookup('env', 'PWD') }}"
     box_boottype: mbr
     efi_bios: "{{ box_efi_bios }}"
+    efi_bios_vars: "{{ box_efi_bios_vars }}"
+    efi_bios_vars_copy: "{{ working_dir }}/build/builder-{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.evivars"
 
     packer_image_dir:
       archlinux:  "{{ working_dir }}/build/images/archlinux"
@@ -54,7 +56,13 @@
 
   - name: set efi bios
     set_fact:
-      efi_bios_boot: "--bios {{ efi_bios }}"
+      efi_bios_boot: "-drive if=pflash,format=raw,readonly=on,file={{ efi_bios }} -drive if=pflash,format=raw,file={{ working_dir }}/build/builder-{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.evivars"
+    when: box_boottype == "efi"
+
+  - name: copy efi vars when boxtype efi
+    copy:
+      src: "{{ efi_bios_vars }}"
+      dest: "{{ efi_bios_vars_copy }}"
     when: box_boottype == "efi"
 
   - name: set qemu binary

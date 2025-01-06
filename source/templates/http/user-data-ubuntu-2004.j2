@@ -4,12 +4,12 @@ autoinstall:
   early-commands:
     - systemctl stop ssh
     - iptables -A INPUT -p tcp --dport 22 -j DROP
-    - echo -n { box_password } > /tmp/luks-key
-  locale: { box_locale }
+    - echo -n {{ box_password }} > /tmp/luks-key
+  locale: {{ box_locale }}
   keyboard: 
-    layout: { box_xorg_keymap }
+    layout: {{ box_xorg_keymap }}
     toggle: null
-    variant: { box_xorg_keymap_vatiant }
+    variant: {{ box_xorg_keymap_vatiant }}
   apt:
     preserve_sources_list: false
     primary:
@@ -22,7 +22,7 @@ autoinstall:
     swap:
       size: 0
     config:
-{ http_part_settings }
+{{ http_part_settings_replace }}
   network:
     version: 2
     ethernets:
@@ -41,9 +41,9 @@ autoinstall:
       ens6:
         dhcp4: true
   identity:
-    hostname: { box_name }
+    hostname: {{ box_name }}
     username: vagrant
-    password: { vagrant_password_replace }
+    password: {{ box_vagrant_password_replace }}
 #    password: $6$rounds=4096$8dkK1P/oE$2DGKKt0wLlTVJ7USY.0jN9du8FetmEr51yjPyeiR.zKE3DGFcitNL/nF1l62BLJNR87lQZixObuXYny.Mf17K1
   refresh-installer:
     update: false
@@ -59,6 +59,6 @@ autoinstall:
     allow-pw: true
   user-data:
     disable_root: false
-    timezone: { box_timezone }
+    timezone: {{ box_timezone }}
   late-commands:
     - echo 'vagrant ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/vagrant

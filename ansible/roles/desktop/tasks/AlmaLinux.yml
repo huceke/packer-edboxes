@@ -31,12 +31,11 @@
       - gpg
     state: present
 
-- name: install gnome desktop
+- name: install xfce desktop
   package:
     name:
-      - gdm
-      - gnome-desktop3
-      - gnome-terminal
+      - lightdm
+      - "@XFCE"
     state: present
 
 - name: qemu additions
@@ -56,12 +55,11 @@
       - gedit
       - dejavu-sans-mono-fonts
       - abattis-cantarell-fonts
-#      - pangox-compat
     state: present
 
 - name: enable login manager
   systemd:
-    name: gdm
+    name: lightdm
     enabled: yes
 
 - name: enable graphical target

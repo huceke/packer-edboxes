@@ -16,10 +16,10 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-box_distribution: ubuntu
-box_name: ubuntu
+box_distribution: rocky8
+box_name: rocky8
 box_addon:  []
-box_boottype: efi
+box_boottype: mbr
 box_encrypt: none
 box_password: changeme1234
 box_desktop_user: changeme
@@ -27,11 +27,12 @@ box_ansible_run: yes
 box_packer_run: no
 box_packer_headless: "false"
 box_disk_size: 16384M
-box_locale: "de_DE.UTF-8"
+box_locale: "en_US.UTF-8"
 box_timezone: "Europe/Vienna"
 box_keymap: "de-latin1-nodeadkeys"
 box_xorg_keymap: "de"
 box_xorg_keymap_model: "pc105"
 box_xorg_keymap_vatiant: "nodeadkeys"
-box_qemu_cpu: "kvm64"
-box_efi_bios: "/usr/share/edk2/x64/OVMF.4m.fd"
+box_qemu_cpu: "Haswell"
+box_efi_bios: "/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+box_efi_bios_vars: "/usr/share/edk2/x64/OVMF_VARS.4m.fd"

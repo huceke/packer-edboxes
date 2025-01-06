@@ -9,17 +9,17 @@
       "boot_command": [
         {{ box_boot_command_replace }}
       ],
-      "boot_wait": "{{ boot_wait[box_distribution] }}",
+      "boot_wait": "{{ packer_boot_wait }}",
       "disk_size": "{{ box_disk_size }}",
       "headless": {{ box_packer_headless }},
       "http_directory": "{{ http_dir }}",
-      "iso_checksum": "{{ packer_iso[box_distribution]['checksum'] }}",
+      "iso_checksum": "{{ packer_iso_checksum }}",
       "iso_urls": [
-      {{ packer_replace_iso_urls: }}
+      {{ packer_replace_iso_urls }}
       ],
-      "output_directory": "{{ packer_image_dir[box_distribution] }}",
+      "output_directory": "{{ packer_output_directory }}",
       "ssh_password": "{{ box_vagrant_password }}",
-      "vm_name": "{{ box_name_filename_replace }}"
+      "vm_name": "{{ box_name_filename_replace }}",
 {% raw %}
       "net_device": "virtio-net",
       "disk_interface": "virtio",
@@ -53,7 +53,7 @@
       "ssh_timeout": "50m",
       "ssh_keep_alive_interval": "1s",
       "ssh_handshake_attempts": "100",
-      "ssh_username": "vagrant",
+      "ssh_username": "vagrant"
     }
   ],
   "provisioners": [
@@ -61,22 +61,30 @@
       "type": "shell",
       "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
       "scripts": [
-        { packer_pre_ansible_scripts }
+{% endraw %}
+        {{ packer_pre_ansible_scripts_replace }}
+{% raw %}
       ]
     },
     {
       "type": "shell",
       "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
       "inline": [
-        { packer_ansible_install }
+{% endraw %}
+        {{ packer_ansible_install_replace }}
+{% raw %}
       ]
     },
-    { packer_ansible_run }
+{% endraw %}
+    {{ packer_ansible_run_replace }}
+{% raw %}
     {
       "type": "shell",
       "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
       "scripts": [
-        { packer_post_ansible_scripts }
+{% endraw %}
+        {{ packer_post_ansible_scripts_replace }}
+{% raw %}
       ]
     }
   ]

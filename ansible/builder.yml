@@ -27,14 +27,34 @@
 
   vars:
 
-    efi_bios: "{{ box_efi_bios }}"
     working_dir: "{{ lookup('env', 'PWD') }}"
     template_dir: "{{ working_dir }}/source/templates"
     http_dir: "{{ working_dir }}/build/http"
     tmp_dir: "{{ working_dir }}/build/tmp"
     packer_cache: "{{ working_dir }}/build/tmp/packer_cache"
+    packer_template_file: "{{ template_dir }}/packer/builder.json.j2"
+    packer_template_file_output: "{{ working_dir }}/build/builder-{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.json"
+    packer_replace_iso_urls: ""
+    packer_pre_ansible_scripts_replace: ""
+    packer_ansible_install_replace: ""
+    packer_post_ansible_scripts_replace: ""
+    packer_ansible_run_replace: ""
 
-    packer_file: "{{ working_dir }}/build/builder-{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.json"
+    efi_bios: "{{ box_efi_bios }}"
+    efi_bios_vars: "{{ box_efi_bios_vars }}"
+    efi_bios_vars_copy: "{{ working_dir }}/build/builder-{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.evivars"
+
+    box_vagrant_password: ""
+    box_vagrant_password_replace: ""
+    box_qemu_efi_bios_replace: ""
+    box_qemu_efi_bios_replace: ""
+    box_qemu_efi_bios_replace: ""
+    box_name_filename_replace: ""
+    box_boot_command_replace: ""
+
+    http_part_settings_replace: ""
+    http_encryption_settings_replace: ""
+    http_efi_boot_replace: ""
 
     builder_http_file:
       archlinux:  "archbootstrap.sh-{{ box_boottype }}-{{ box_encrypt }}"
@@ -47,18 +67,18 @@
       rocky8:     "rocky8-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
       almalinux:  "almalinux-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
 
-    builder_http_dst_file: "{{ http_dir }}/{{ builder_http_file[box_distribution] }}"
+    builder_http_dst_file_j2: "{{ http_dir }}/{{ builder_http_file[box_distribution] }}"
 
-    builder_template_file:
-      archlinux:  "{{ template_dir }}/http/archbootstrap.sh"
-      debian:     "{{ template_dir }}/http/debian10-preseed.cfg"
-      ubuntu:     "{{ template_dir }}/http/user-data-ubuntu-2004"
-      fedora:     "{{ template_dir }}/http/fedora37-kvm-ks.cfg"
-      rhel9:      "{{ template_dir }}/http/rhel9-kvm-ks.cfg"
-      rhel8:      "{{ template_dir }}/http/rhel8-kvm-ks.cfg"
-      rhel7:      "{{ template_dir }}/http/rhel7-kvm-ks.cfg"
-      rocky8:     "{{ template_dir }}/http/rocky8-kvm-ks.cfg"
-      almalinux:  "{{ template_dir }}/http/almalinux-kvm-ks.cfg"
+    builder_template_file_j2:
+      archlinux:  "{{ template_dir }}/http/archbootstrap.sh.j2"
+      debian:     "{{ template_dir }}/http/debian10-preseed.cfg.j2"
+      ubuntu:     "{{ template_dir }}/http/user-data-ubuntu-2004.j2"
+      fedora:     "{{ template_dir }}/http/fedora41-kvm-ks.cfg.j2"
+      rhel9:      "{{ template_dir }}/http/rhel9-kvm-ks.cfg.j2"
+      rhel8:      "{{ template_dir }}/http/rhel8-kvm-ks.cfg.j2"
+      rhel7:      "{{ template_dir }}/http/rhel7-kvm-ks.cfg.j2"
+      rocky8:     "{{ template_dir }}/http/rocky8-kvm-ks.cfg.j2"
+      almalinux:  "{{ template_dir }}/http/almalinux-kvm-ks.cfg.j2"
 
     packer_image_dir:
       archlinux:  "{{ working_dir }}/build/images/archlinux"
@@ -73,6 +93,7 @@
 
     packer_iso:
       archlinux:
+        cache_id: "e00e0584a9cbbc6af66aa7bad747f0c387075ac2"
         checksum: "sha256:bceb3dded8935c1d3521c475a69ae557e082839b46d921c8b400524470b5c965"
         urls: 
           - '"iso/archlinux-2024.11.01-x86_64.iso",'
@@ -501,21 +522,6 @@ it><F10>"'
     debug:
       msg: "packer-edboxes, Copyright (C) 2021 Edgar Vichor. packer-edboxes comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions."
 
-  - name: create vagrant password
-    shell: openssl rand -base64 32
-    register: openssl_password
-
-  - name: register vagrant password
-    set_fact:
-      vagrant_password: "{{ vagrant_password }}{{ item }}"
-    with_items: "{{ openssl_password.stdout_lines }}"
-    vars:
-      vagrant_password: ""
-
-  - name: debug vagrant password
-    debug:
-      msg: "{{ vagrant_password }}"
-
   - name: check box_distribution
     fail:
       msg: 
@@ -550,6 +556,19 @@ it><F10>"'
       - box_encrypt != "none"
       - box_encrypt != "luks"
 
+  - name: create vagrant password
+    shell: openssl rand -base64 32
+    register: openssl_password
+
+  - name: register vagrant password
+    set_fact:
+      box_vagrant_password: "{{ item }}"
+    with_items: "{{ openssl_password.stdout_lines }}"
+
+  - name: debug vagrant password
+    debug:
+      msg: "{{ box_vagrant_password }}"
+
   - name: packer tmp directory -> {{ tmp_dir }}
     file:
       path: "{{ tmp_dir }}"
@@ -571,12 +590,6 @@ it><F10>"'
       mode: 0755
     become: false
 
-  - name: copy http template file {{ builder_template_file[box_distribution] }} -> {{ builder_http_dst_file }}
-    copy:
-      src: "{{ builder_template_file[box_distribution] }}"
-      dest: "{{ builder_http_dst_file }}"
-      mode: 0644
-
   - name: create ubuntu http meta-data
     file:
       path: "{{ http_dir }}/meta-data"
@@ -585,207 +598,93 @@ it><F10>"'
     become: false
     when: box_distribution == 'ubuntu'
 
-  - name: copy packer template file {{ template_dir }}/packer/builder.json -> {{ packer_file }}
-    copy:
-      src: "{{ template_dir }}/packer/builder.json"
-      dest: "{{ packer_file }}"
-      mode: 0644
-
-  - name: box_distribution set root passwd
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ box_password }"
-      replace: "{{ box_password }}"
-
   - name: box_distribution set vagrant password ubuntu
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ vagrant_password }"
-      replace: "{{ vagrant_password | password_hash('sha512') }}"
+    set_fact:
+      box_vagrant_password_replace: "{{ box_vagrant_password | password_hash('sha512') }}"
     when: box_distribution == 'ubuntu'
-
-  - name: box_distribution set vagrant password
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ vagrant_password }"
-      replace: "{{ vagrant_password }}"
-
-  - name: box_distribution set vm name
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ box_name }"
-      replace: "{{ box_name }}"
 
   - name: distributuion set partitioning
     set_fact:
       http_part_settings_replace: "{{ http_part_settings_replace }}{{ item }}\n"
     with_items: "{{ http_part_settings[box_distribution][box_boottype] }}"
-    vars:
-      http_part_settings_replace: ""
 
-  - name: distributuion replace partitioning
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ http_part_settings }"
-      replace: "{{ http_part_settings_replace }}"
+#  - name: distributuion set partitioning encryption password
+#    set_fact:
+#      http_part_settings_replace: "{{ http_part_settings_replace | replace('{ box_password }', http_encryption_settings_replace) }}"
+#    when: box_distribution == "ubuntu"
 
   - name: distributuion set encryption settings
     set_fact:
       http_encryption_settings_replace: "{{ http_encryption_settings_replace }}{{ item }}\n"
     with_items: "{{ http_encryption_settings[box_distribution][box_encrypt] }}"
-    vars:
-      http_encryption_settings_replace: ""
 
-  - name: distributuion replace encryption settings
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ http_encryption_settings }"
-      replace: "{{ http_encryption_settings_replace }}"
+  - name: distributuion replace encryption settings ubuntu
+    set_fact:
+      http_part_settings_replace: "{{ http_part_settings_replace | replace('{ http_encryption_settings }', http_encryption_settings_replace) }}"
+    when: box_distribution == "ubuntu"
 
   - name: distributuion set efi boot
     set_fact:
       http_efi_boot_replace: "{{ http_efi_boot_replace }}{{ item }}\n"
     with_items: "{{ http_efi_boot[box_distribution][box_boottype] }}"
-    vars:
-      http_efi_boot_replace: ""
-
-  - name: distributuion replace efi boot
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ http_efi_boot }"
-      replace: "{{ http_efi_boot_replace }}"
-
-  # replace ansible_extra_arguments in a second run, otherwise we get garbage for packer
-  - name: packer ansible run
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_ansible_run }"
-      replace: |
-        {
-          "type": "ansible-local",
-          "playbook_dir": "ansible",
-          "playbook_file": "./ansible/playbook.yml",
-          "extra_arguments": [
-            "--extra-vars", 
-            "{ ansible_extra_arguments }",
-             "-vvv"
-          ],
-          "clean_staging_directory": false
-        },
-    when: box_ansible_run or box_ansible_run | bool
-
-  - name: distributuion replace locate
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ box_locale }"
-      replace: "{{ box_locale }}"
-
-  - name: distributuion replace timezone
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ box_timezone }"
-      replace: "{{ box_timezone }}"
-
-  - name: distributuion replace keymap
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ box_keymap }"
-      replace: "{{ box_keymap }}"
-
-  - name: distributuion replace xorg keyboard
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ box_xorg_keymap }"
-      replace: "{{ box_xorg_keymap }}"
-
-  - name: distributuion replace xorg keyboard model
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ box_xorg_keymap_model }"
-      replace: "{{ box_xorg_keymap_model }}"
-
-  - name: distributuion replace xorg keyboard variant
-    replace:
-      path: "{{ builder_http_dst_file }}"
-      regexp: "{ box_xorg_keymap_vatiant }"
-      replace: "{{ box_xorg_keymap_vatiant }}"
 
   # stupid rhel 7 ansible. lists are treated as a lists with unicode strings
   - name: convert addon list
     set_fact:
       box_addon_converted: "{{ box_addon | to_yaml | replace('\n', '')}}"
 
-  # ansible_extra_arguments replacement
+  # keep the whitespaces at the begin and end of the replace string. otherwise ansible thinks it's a dict
   - name: packer ansible run
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ ansible_extra_arguments }"
-      replace: '\"{ box_name: {{ box_name }}, ansible_become_password: {{ vagrant_password }}, box_password: {{ box_password }}, box_addon: {{ box_addon_converted }}, box_desktop_user: {{ box_desktop_user }}, box_locale: {{ box_locale }}, box_timezone: {{ box_timezone }}, box_keymap: {{ box_keymap }}, box_xorg_keymap: {{ box_xorg_keymap }}, box_xorg_keymap_model: {{ box_xorg_keymap_model }}, box_xorg_keymap_vatiant: {{ box_xorg_keymap_vatiant }}, box_boottype: {{ box_boottype }} }\"'
+    set_fact:
+      packer_ansible_run_replace: |
+
+        {
+          "type": "ansible-local",
+          "playbook_dir": "ansible",
+          "playbook_file": "./ansible/playbook.yml",
+          "extra_arguments": [
+            "--extra-vars", 
+            "\"{ box_name: {{ box_name }}, ansible_become_password: {{ box_vagrant_password }}, box_password: {{ box_password }}, box_addon: {{ box_addon_converted }}, box_desktop_user: {{ box_desktop_user }}, box_locale: {{ box_locale }}, box_timezone: {{ box_timezone }}, box_keymap: {{ box_keymap }}, box_xorg_keymap: {{ box_xorg_keymap }}, box_xorg_keymap_model: {{ box_xorg_keymap_model }}, box_xorg_keymap_vatiant: {{ box_xorg_keymap_vatiant }}, box_boottype: {{ box_boottype }} }\"",
+             "-vvv"
+          ],
+          "clean_staging_directory": false
+        },
+
     when: box_ansible_run or box_ansible_run | bool
 
   - name: packer ansible norun
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_ansible_run }"
-      replace: ""
+    set_fact:
+      packer_ansible_run_replace: ""
     when: not box_ansible_run
 
-  - name: ubuntu efi workaround
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ qemu_efi_bios }"
-      replace: |
-        , [ "-bios", "{{ efi_bios }}" ],
-        [ "-device", "virtio-blk-pci,drive=drive0,bootindex=0" ],
-        [ "-device", "virtio-blk-pci,drive=cdrom0,bootindex=1" ],
-        [ "-drive", "if=none,file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,cache=writeback,discard=ignore,format=qcow2,id=drive0" ],
-        [ "-drive", "if=none,file=build/tmp/packer_cache/{{ packer_iso[box_distribution]['cache_id'] }}.iso,media=cdrom,id=cdrom0" ]
-    when: box_distribution == "ubuntu" and box_boottype == 'efi'
+  - name: ubuntu efi workaround box_qemu_efi_bios_replace
+    set_fact:
+      box_qemu_efi_bios_replace: |
+        , [ "-bios", "{{ efi_bios }}" ]
+        , [ "-device", "virtio-blk-pci,drive=drive0,bootindex=0" ]
+        , [ "-device", "virtio-blk-pci,drive=cdrom0,bootindex=1" ]
+        , [ "-drive", "if=pflash,format=raw,readonly=on,file={{ efi_bios }}" ]
+        , [ "-drive", "if=pflash,format=raw,file={{ efi_bios_vars_copy }}" ]
+        , [ "-drive", "if=none,file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,cache=writeback,discard=ignore,format=qcow2,id=drive0" ]
+        , [ "-drive", "if=none,file=build/tmp/packer_cache/{{ packer_iso[box_distribution]['cache_id'] }}.iso,media=cdrom,id=cdrom0" ]
+    when: (box_distribution == "ubuntu" and box_boottype == "efi") or
+          (box_distribution == "archlinux" and box_boottype == "efi")
       
-  - name: packer set mbr bios
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ qemu_efi_bios }"
-      replace: ""
+  - name: packer set efi bios box_qemu_efi_bios_replace
+    set_fact:
+      box_qemu_efi_bios_replace: |
+        , [ "-bios", "{{ efi_bios }}" ]
+    when: (box_distribution != "ubuntu" and box_distribution != "archlinux") and
+          box_boottype == "efi"
+
+  - name: packer set mbr bios box_qemu_efi_bios_replace
+    set_fact:
+      box_qemu_efi_bios_replace: ""
     when: box_boottype == "mbr"
 
-  - name: packer set efi bios
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ qemu_efi_bios }"
-      replace: |
-        , [ "-bios", "{{ efi_bios }}" ]
-    when: box_boottype == "efi"
-
-  - name: packer set vagrant password
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ vagrant_password }"
-      replace: "{{ vagrant_password }}"
-
-#  - name: packer set root password
-#    replace:
-#      path: "{{ packer_file }}"
-#      regexp: "{ box_password }"
-#      replace: "{{ box_password }}"
-#
-  - name: packer set disek size
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ box_disk_size }"
-      replace: "{{ box_disk_size }}"
-
-#  - name: packer set box_name
-#    replace:
-#      path: "{{ packer_file }}"
-#      regexp: "{ box_name }"
-#      replace: "{{ box_name }}"
-
-  - name: packer set box_name_filename
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ box_name_filename }"
-      replace: "{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2"
+  - name: packer set box_name_filename_replace
+    set_fact:
+      box_name_filename_replace: "{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2"
 
   - name: packer set qemu_binary replacment
     set_fact:
@@ -797,148 +696,73 @@ it><F10>"'
       box_qemu_binary_replace: ''
     when: box_qemu_binary | length < 1
 
-  - name: packer qemu binary
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_qemu_binary }"
-      replace: "{{ box_qemu_binary_replace }}"
-
-  - name: packer qemu cpu
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ qemu_cpu }"
-      replace: "{{ box_qemu_cpu }}"
-
   - name: packer iso checksum
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_iso_checksum }"
-      replace: "{{ packer_iso[box_distribution]['checksum'] }}"
+    set_fact:
+      packer_iso_checksum: "{{ packer_iso[box_distribution]['checksum'] }}"
 
   - name: packer set iso urls
     set_fact:
       packer_replace_iso_urls: "{{ packer_replace_iso_urls }}{{ item }}\n"
     with_items: "{{ packer_iso[box_distribution]['urls'] }}"
-    vars:
-      packer_replace_iso_urls: ""
-
-  - name: packer replace iso urls
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_iso_urls }"
-      replace: "{{ packer_replace_iso_urls }}"
 
   - name: packer set vm image dir
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_image_dir }"
-      replace: "{{ packer_image_dir[box_distribution] }}"
-
-#  - name: packer set box addon
-#    replace:
-#      path: "{{ packer_file }}"
-#      regexp: "{ box_addon }"
-#      replace: "{{ box_addon }}"
-
-#  - name: packer set desktop user
-#    replace:
-#      path: "{{ packer_file }}"
-#      regexp: "{ box_desktop_user }"
-#      replace: "{{ box_desktop_user }}"
+    set_fact:
+      packer_output_directory: "{{ packer_image_dir[box_distribution] }}"
 
   - name: packer boot command
     set_fact:
-      boot_command_replace: "{{ boot_command_replace }} {{ item }}\n "
+      box_boot_command_replace: "{{ box_boot_command_replace }} {{ item }}\n "
     with_items: "{{ boot_command[box_distribution][box_boottype] }}"
-    vars:
-      boot_command_replace: ""
-
-  - name: packer boot command replace
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ boot_command }"
-      replace: "{{ boot_command_replace }}"
 
   - name: packer boot_wait
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ boot_wait }"
-      replace: "{{ boot_wait[box_distribution] }}"
-
-  - name: packer http_directory
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_http_directory }"
-      replace: "{{ http_dir }}"
-
-  - name: packer packer_headless
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_headless }"
-      replace: "{{ box_packer_headless }}"
+    set_fact:
+      packer_boot_wait: "{{ boot_wait[box_distribution] }}"
 
   - name: packer pre ansible install
     set_fact:
-      packer_pre_ansible_scripts_install: "{{ packer_pre_ansible_scripts_install }}{{ item }}\n"
+      packer_pre_ansible_scripts_replace: "{{ packer_pre_ansible_scripts_replace }}{{ item }}\n"
     with_items: "{{ packer_pre_ansible_scripts[box_distribution] }}"
-    vars:
-      packer_pre_ansible_scripts_install: ""
 
-  - name: packer pre ansible install replace
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_pre_ansible_scripts }"
-      replace: "{{ packer_pre_ansible_scripts_install }}"
-    when: box_ansible_run or box_ansible_run | bool
-
-  - name: packer pre ansible install replace
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_pre_ansible_scripts }"
-      replace: "\"script/dummy.sh\""
+  - name: packer pre ansible install
+    set_fact:
+      packer_pre_ansible_scripts: "\"script/dummy.sh\""
     when: not box_ansible_run
 
   - name: packer ansible install
     set_fact:
       packer_ansible_install_replace: "{{ packer_ansible_install_replace }}{{ item }}\n"
     with_items: "{{ packer_ansible_install[box_distribution] }}"
-    vars:
-      packer_ansible_install_replace: ""
 
-  - name: packer ansible install replace
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_ansible_install }"
-      replace: "{{ packer_ansible_install_replace }}"
-    when: box_ansible_run or box_ansible_run | bool
-
-  - name: packer ansible install replace
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_ansible_install }"
-      replace: "\"\""
+  - name: packer ansible install
+    set_fact:
+      packer_ansible_install_replace: "\"\""
     when: not box_ansible_run
 
   - name: packer post ansible scripts
     set_fact:
-      packer_post_ansible_scripts_install: "{{ packer_post_ansible_scripts_install }}{{ item }}\n"
+      packer_post_ansible_scripts_replace: "{{ packer_post_ansible_scripts_replace }}{{ item }}\n"
     with_items: "{{ packer_post_ansible_scripts[box_distribution] }}"
-    vars:
-      packer_post_ansible_scripts_install: ""
 
-  - name: packer post ansible scripts replace
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_post_ansible_scripts }"
-      replace: "{{ packer_post_ansible_scripts_install }}"
-    when: box_ansible_run or box_ansible_run | bool
-
-  - name: packer post ansible scripts replace
-    replace:
-      path: "{{ packer_file }}"
-      regexp: "{ packer_post_ansible_scripts }"
-      replace: "\"source/script/dummy.sh\""
+  - name: packer post ansible scripts
+    set_fact:
+      packer_post_ansible_scripts_replace: "\"source/script/dummy.sh\""
     when: not box_ansible_run
+
+  - name: generate packer file
+    template:
+      src: "{{ packer_template_file }}"
+      dest: "{{ packer_template_file_output }}"
+
+  - name: generate http file
+    template:
+      src: "{{ builder_template_file_j2[box_distribution] }}"
+      dest: "{{ builder_http_dst_file_j2 }}"
+
+  - name: copy efi vars when boxtype efi
+    copy:
+      src: "{{ efi_bios_vars }}"
+      dest: "{{ efi_bios_vars_copy }}"
+    when: box_boottype == "efi"
 
   - name: print box settings
     debug:
@@ -960,10 +784,10 @@ it><F10>"'
 
   - name: print build command
     debug:
-      msg: "PACKER_CACHE_DIR={{ packer_cache }} TMPDIR={{ tmp_dir }} PACKER_LOG=1 packer build -force -on-error=abort {{ packer_file }}"
+      msg: "PACKER_CACHE_DIR={{ packer_cache }} TMPDIR={{ tmp_dir }} PACKER_LOG=1 packer build -force -on-error=abort {{ packer_template_file_output }}"
 
   - name: running packer
     ansible.builtin.shell: |
       cd {{ working_dir }}
-      PACKER_CACHE_DIR={{ packer_cache }} TMPDIR={{ tmp_dir }} PACKER_LOG=1 packer build -force -on-error=abort {{ packer_file }}
+      PACKER_CACHE_DIR={{ packer_cache }} TMPDIR={{ tmp_dir }} PACKER_LOG=1 packer build -force -on-error=abort {{ packer_template_file_output }}
     when: box_packer_run or box_packer_run | bool
