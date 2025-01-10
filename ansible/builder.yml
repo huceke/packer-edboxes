@@ -160,8 +160,7 @@
           - '"/usr/bin/bash ./{{ builder_http_file[box_distribution] }}<enter>"'
       fedora:
         mbr:
-          - '"<up>e<down><down><end> inst.text inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wa
-it><F10>"'
+          - '"<up>e<down><down><end> inst.text inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><F10>"'
         efi:
           - '"<up><wait>e<wait><down><down><end> inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><leftCtrlOn><x>"'
       debian:
