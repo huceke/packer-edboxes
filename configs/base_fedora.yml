@@ -29,5 +29,5 @@ box_packer_headless: "false"
 box_disk_size: 16384M
 box_locale: "de_DE.UTF-8"
 box_qemu_cpu: "kvm64"
-box_efi_bios: "/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+box_efi_bios: "/usr/share/edk2/x64/OVMF.4m.fd"
 box_efi_bios_vars: "/usr/share/edk2/x64/OVMF_VARS.4m.fd"
