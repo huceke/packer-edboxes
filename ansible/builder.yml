@@ -110,10 +110,10 @@
           - '"iso/ubuntu-20.04.4-live-server-amd64.iso",'
           - '"https://releases.ubuntu.com/20.04/ubuntu-20.04.4-live-server-amd64.iso"'
       fedora:
-        checksum: "sha256:630c52ba9e7a7f229b026e241ba74b9bc105e60ba5bf7b222693ae0e25f05c97"
+        checksum: "sha256:231f3e0d1dc8f565c01a9f641b3d16c49cae44530074bc2047fe2373a721c82f"
         urls: 
-          - '"iso/Fedora-Server-netinst-x86_64-41-1.4.iso",'
-          - '"https://mirror.karneval.cz/pub/linux/fedora/linux/releases/41/Server/x86_64/iso/Fedora-Server-netinst-x86_64-41-1.4.iso"'
+          - '"iso/Fedora-Server-netinst-x86_64-42-1.1.is",'
+          - '"https://mirror.karneval.cz/pub/linux/fedora/linux/releases/42/Server/x86_64/iso/Fedora-Server-netinst-x86_64-42-1.1.iso"'
       rhel9:
         checksum: "sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2"
         urls:
