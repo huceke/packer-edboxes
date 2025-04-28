@@ -93,11 +93,11 @@
 
     packer_iso:
       archlinux:
-        cache_id: "f7dc56aada775e389cf4012dce81f8ec17aca9f4"
-        checksum: "sha256:8150e3c1a479de9134baa13cea4ff78856cca5ebeb9bdfa87ecfce2e47ac9b5b"
+        cache_id: "1127d4940e14d23f53597f8d79f876f5f7854a3e"
+        checksum: "sha256:1155af9c142387c45eb6fbdbf32f5652fb514ce15a4d17a83e6056a996895026"
         urls: 
-          - '"iso/archlinux-2025.03.01-x86_64.iso",'
-          - '"https://mirror.easyname.at/archlinux/iso/2025.03.01/archlinux-2025.03.01-x86_64.iso"'
+          - '"iso/archlinux-2025.04.01-x86_64.iso",'
+          - '"https://mirror.easyname.at/archlinux/iso/2025.04.01/archlinux-2025.04.01-x86_64.iso"'
       debian:
         checksum: "sha256:1257373c706d8c07e6917942736a865dfff557d21d76ea3040bb1039eb72a054"
         urls: 
