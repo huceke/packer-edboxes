@@ -134,11 +134,12 @@
     content: |
       alias vi="vim"
 
-- name: dircolors
+- name: boxcolors
   copy:
-    dest: "/etc/profile.d/dircolors.sh"
+    dest: "/etc/profile.d/boxcolors.sh"
     content: |
       alias ls='ls --color=auto'
+      alias ip='ip --color=auto'
   
 - name: modprobe usb storage conf
   copy:

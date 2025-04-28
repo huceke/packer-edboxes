@@ -33,6 +33,26 @@
       - spice-vdagent
     state: present
 
+- name: remove plymouth
+  ansible.builtin.dnf:
+    name:
+      - plymouth*
+    autoremove: true
+    state: absent
+  become: yes
+
+- name: regen initrd
+  ansible.builtin.command:
+  args:
+    argv:
+      - /usr/bin/dracut
+      - --regenerate-all
+      - --force
+      - --no-hostonly
+    chdir: /boot
+  ignore_errors: true
+  become: yes
+
 - name: enable qemu guest agent
   systemd:
     name: qemu-guest-agent
