@@ -61,6 +61,7 @@
       debian:     "debian10-preseed.cfg-{{ box_boottype }}-{{ box_encrypt }}"
       ubuntu:     "user-data"
       fedora:     "fedora41-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
+      rhel10:     "rhel10-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
       rhel9:      "rhel9-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
       rhel8:      "rhel8-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
       rhel7:      "rhel7-kvm-ks.cfg-{{ box_boottype }}-{{ box_encrypt }}"
@@ -74,6 +75,7 @@
       debian:     "{{ template_dir }}/http/debian10-preseed.cfg.j2"
       ubuntu:     "{{ template_dir }}/http/user-data-ubuntu-2004.j2"
       fedora:     "{{ template_dir }}/http/fedora41-kvm-ks.cfg.j2"
+      rhel10:     "{{ template_dir }}/http/rhel10-kvm-ks.cfg.j2"
       rhel9:      "{{ template_dir }}/http/rhel9-kvm-ks.cfg.j2"
       rhel8:      "{{ template_dir }}/http/rhel8-kvm-ks.cfg.j2"
       rhel7:      "{{ template_dir }}/http/rhel7-kvm-ks.cfg.j2"
@@ -85,6 +87,7 @@
       debian:     "{{ working_dir }}/build/images/debian"
       ubuntu:     "{{ working_dir }}/build/images/ubuntu"
       fedora:     "{{ working_dir }}/build/images/fedora"
+      rhel10:     "{{ working_dir }}/build/images/rhel10"
       rhel9:      "{{ working_dir }}/build/images/rhel9"
       rhel8:      "{{ working_dir }}/build/images/rhel8"
       rhel7:      "{{ working_dir }}/build/images/rhel7"
@@ -114,18 +117,22 @@
         urls: 
           - '"iso/Fedora-Server-netinst-x86_64-42-1.1.is",'
           - '"https://mirror.karneval.cz/pub/linux/fedora/linux/releases/42/Server/x86_64/iso/Fedora-Server-netinst-x86_64-42-1.1.iso"'
+      rhel10:
+        checksum: "sha256:edce2dd6f8e1d1b2ff0b204f89b0659bc9e320d175beb7caad60712957a19608"
+        urls:
+          - '"iso/rhel-10.0-x86_64-dvd.iso"'
       rhel9:
         checksum: "sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2"
         urls:
-          - '"iso/rhel-9.2-x86_64-dvd.iso",'
+          - '"iso/rhel-9.2-x86_64-dvd.iso"'
       rhel8:
         checksum: "sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09"
         urls: 
-          - '"iso/rhel-8.8-x86_64-dvd.iso",'
+          - '"iso/rhel-8.8-x86_64-dvd.iso"'
       rhel7:
         checksum: "sha256:19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191"
         urls: 
-          - '"iso/rhel-server-7.9-x86_64-dvd.iso",'
+          - '"iso/rhel-server-7.9-x86_64-dvd.iso"'
       rocky8:
         checksum: "sha256:53a62a72881b931bdad6b13bcece7c3a2d4ca9c4a2f1e1a8029d081dd25ea61f"
         urls:
@@ -142,6 +149,7 @@
       debian:     "10s"
       ubuntu:     "2s"
       fedora:     "10s"
+      rhel10:     "10s"
       rhel9:      "10s"
       rhel8:      "10s"
       rhel7:      "10s"
@@ -210,6 +218,11 @@
           - '"<bs><bs><bs>",'
           - '" autoinstall \"ds=nocloud-net;s=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/\"",'
           - '" --- <wait><f10><wait>"'
+      rhel10:
+        mbr:
+          - '"<up><wait>e<wait><down><down><end> inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><leftCtrlOn><x>"'
+        efi:
+          - '"<up><wait>e<wait><down><down><end> inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<wait><leftCtrlOn><x>"'
       rhel9:
         mbr:
           - '"<up><wait><tab><wait> text inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ builder_http_file[box_distribution] }}<enter><wait>"'
@@ -250,6 +263,8 @@
         - '"apt-get -y install ansible",'
         - '"apt-get -y install ansible-lint",'
         - '"echo \"vagrant        ALL=(ALL)       NOPASSWD: ALL\" >> /etc/sudoers.d/vagrant"'
+      rhel10:
+        - '""'
       rhel9:
         - '""'
       rhel8:
@@ -272,6 +287,8 @@
         - '"source/script/dummy.sh"'
       ubuntu:
         - '"source/script/dummy.sh"'
+      rhel10:
+        - '"source/script/rhel10-ansible.sh"'
       rhel9:
         - '"source/script/rhel9-ansible.sh"'
       rhel8:
@@ -291,6 +308,9 @@
       debian:
         - '"source/script/cleanup.sh"'
       ubuntu:
+        - '"source/script/cleanup.sh"'
+      rhel10:
+        - '"source/script/rhel10-ansible-post.sh",'
         - '"source/script/cleanup.sh"'
       rhel9:
         - '"source/script/rhel9-ansible-post.sh",'
@@ -336,6 +356,11 @@
           - '      id: dm_crypt-0}'
           - '    - name: rootvg_vm'
           - '      devices: [dm_crypt-0]'
+      rhel10:
+        none:
+          - 'part pv.4 --grow --size=100'
+        luks:
+          - 'part pv.4 --grow --size=100 --encrypted  --luks-version=luks2 --cipher=aes-xts-plain64 --pbkdf-time=5000 --passphrase={{ box_password }}'
       rhel9:
         none:
           - 'part pv.4 --grow --size=100'
@@ -379,6 +404,11 @@
         efi:
           - 'd-i partman-efi/non_efi_system boolean true'
       ubuntu:
+        mbr:
+          - ''
+        efi:
+          - ''
+      rhel10:
         mbr:
           - ''
         efi:
@@ -484,6 +514,13 @@
           - '    - {device: format-2, path: /, type: mount, id: mount-2}'
           - '    - {device: format-1, path: /boot, type: mount, id: mount-1}'
           - '    - {device: format-0, path: /boot/efi, type: mount, id: mount-0}'          
+      rhel10:
+        mbr:
+          - 'part biosboot --fstype=biosboot --size=1'
+          - 'part /boot --fstype="ext4" --size=1024'
+        efi:
+          - 'part /boot/efi --fstype="efi" --size=512 --fsoptions="umask=0077,shortname=winnt"'
+          - 'part /boot --fstype="ext4" --size=1024'
       rhel9:
         mbr:
           - 'part /boot --fstype="ext4" --size=1024'
@@ -525,12 +562,13 @@
     fail:
       msg: 
         - "Unsupported box_distribution : {{ box_distribution }}"
-        - "Supported : archlinux|fedora|debian|ubuntu|rhel9|rhel8|rhel7|rocky8|almalinux"
+        - "Supported : archlinux|fedora|debian|ubuntu|rhel10|rhel9|rhel8|rhel7|rocky8|almalinux"
     when:
       - box_distribution != "archlinux"
       - box_distribution != "fedora"
       - box_distribution != "debian"
       - box_distribution != "ubuntu"
+      - box_distribution != "rhel10"
       - box_distribution != "rhel9"
       - box_distribution != "rhel8"
       - box_distribution != "rhel7"

@@ -42,9 +42,15 @@
       - cloud-init
       - cloud-utils-growpart
       - tar
-      - puppet-agent
       - tuned
     state: present
+
+- name: puppet agent
+  package:
+    name:
+      - puppet-agent
+  become: yes
+  when: ansible_facts['distribution'] == "RedHat" and ansible_facts['distribution_major_version'] != "10"
 
 - name: remove unneeded
   package:
@@ -121,18 +127,24 @@
 
 - name: reduce vts
   command: sed -e "s/^#NAutoVTs=.*/NAutoVTs=0/g" -i /etc/systemd/logind.conf
+  when: ansible_facts['distribution'] == "RedHat" and ansible_facts['distribution_major_version'] != "10"
 
-- name: cleanup dnf cacche
+- name: cleanup dnf cache
+  command: dnf clean all
+  become: yes
+  when: ansible_facts['distribution'] == "RedHat" and ansible_facts['distribution_major_version'] == "10"
+
+- name: cleanup dnf cache
   command: dnf clean all
   become: yes
   when: ansible_facts['distribution'] == "RedHat" and ansible_facts['distribution_major_version'] == "9"
 
-- name: cleanup dnf cacche
+- name: cleanup dnf cache
   command: dnf clean all
   become: yes
   when: ansible_facts['distribution'] == "RedHat" and ansible_facts['distribution_major_version'] == "8"
 
-- name: cleanup yum cacche
+- name: cleanup yum cache
   command: yum clean all
   become: yes
   when: ansible_facts['distribution'] == "RedHat" and ansible_facts['distribution_major_version'] == "7"

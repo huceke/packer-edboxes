@@ -37,6 +37,7 @@
       debian:     "{{ working_dir }}/build/images/debian"
       ubuntu:     "{{ working_dir }}/build/images/ubuntu"
       fedora:     "{{ working_dir }}/build/images/fedora"
+      rhel10:     "{{ working_dir }}/build/images/rhel10"
       rhel9:      "{{ working_dir }}/build/images/rhel9"
       rhel8:      "{{ working_dir }}/build/images/rhel8"
       rhel7:      "{{ working_dir }}/build/images/rhel7"

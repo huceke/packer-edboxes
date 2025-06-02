@@ -16,8 +16,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-box_distribution: rhel7
-box_name: rhel7
+box_distribution: rhel10
+box_name: rhel10
 box_addon:  []
 box_boottype: mbr
 box_encrypt: none
@@ -33,6 +33,6 @@ box_keymap: "de-latin1-nodeadkeys"
 box_xorg_keymap: "de"
 box_xorg_keymap_model: "pc105"
 box_xorg_keymap_vatiant: "nodeadkeys"
-box_qemu_cpu: "kvm64"
+box_qemu_cpu: "Haswell"
 box_efi_bios: "/usr/share/edk2/x64/OVMF.4m.fd"
 box_efi_bios_vars: "/usr/share/edk2/x64/OVMF_VARS.4m.fd"
