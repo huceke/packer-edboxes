@@ -96,11 +96,11 @@
 
     packer_iso:
       archlinux:
-        cache_id: "1127d4940e14d23f53597f8d79f876f5f7854a3e"
-        checksum: "sha256:1155af9c142387c45eb6fbdbf32f5652fb514ce15a4d17a83e6056a996895026"
+        cache_id: "9ef84a8e78ffa8481d674a28229d7789e1299a8d"
+        checksum: "sha256:06ee9907fef3a9843a5b1408bbb426cf5c703aa00ca191ee24daa7ddda82a6a7"
         urls: 
-          - '"iso/archlinux-2025.04.01-x86_64.iso",'
-          - '"https://mirror.easyname.at/archlinux/iso/2025.04.01/archlinux-2025.04.01-x86_64.iso"'
+          - '"iso/archlinux-2025.06.01-x86_64.iso",'
+          - '"https://mirror.easyname.at/archlinux/iso/2025.06.01/archlinux-2025.06.01-x86_64.iso"'
       debian:
         checksum: "sha256:1257373c706d8c07e6917942736a865dfff557d21d76ea3040bb1039eb72a054"
         urls: 
@@ -118,6 +118,7 @@
           - '"iso/Fedora-Server-netinst-x86_64-42-1.1.is",'
           - '"https://mirror.karneval.cz/pub/linux/fedora/linux/releases/42/Server/x86_64/iso/Fedora-Server-netinst-x86_64-42-1.1.iso"'
       rhel10:
+        cache_id: "b80ec1d6a350165089ba3b11de6b06a8bad62c47"
         checksum: "sha256:edce2dd6f8e1d1b2ff0b204f89b0659bc9e320d175beb7caad60712957a19608"
         urls:
           - '"iso/rhel-10.0-x86_64-dvd.iso"'
@@ -705,7 +706,8 @@
         , [ "-drive", "if=none,file={{ packer_image_dir[box_distribution] }}/{{ box_name }}-{{ box_distribution }}-{{ box_boottype }}-{{ box_encrypt }}.qcow2,cache=writeback,discard=ignore,format=qcow2,id=drive0" ]
         , [ "-drive", "if=none,file=build/tmp/packer_cache/{{ packer_iso[box_distribution]['cache_id'] }}.iso,media=cdrom,id=cdrom0" ]
     when: (box_distribution == "ubuntu" and box_boottype == "efi") or
-          (box_distribution == "archlinux" and box_boottype == "efi")
+          (box_distribution == "archlinux" and box_boottype == "efi") or
+          (box_distribution == "rhel10" and box_boottype == "efi")
       
   - name: packer set efi bios box_qemu_efi_bios_replace
     set_fact:
